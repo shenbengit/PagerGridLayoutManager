@@ -1,19 +1,26 @@
 package com.shencoder.pagergridlayoutmanager;
 
+import android.content.Context;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.annotation.RestrictTo;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 
 /**
  * 分页滑动网格布局LayoutManager
@@ -34,11 +41,17 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      */
     public static final int VERTICAL = RecyclerView.VERTICAL;
 
+    @RestrictTo(LIBRARY_GROUP_PREFIX)
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Orientation {
+    }
+
     private PagerGridSnapHelper mPagerGridSnapHelper;
     /**
      * 当前滑动方向
      */
-    @RecyclerView.Orientation
+    @Orientation
     private int mOrientation = HORIZONTAL;
     /**
      * 行数
@@ -75,9 +88,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      */
     private int mItemHeightUsed;
 
-    private int mMaxScrollX;
-    private int mMaxScrollY;
-
     /**
      * 当前页码下标
      * 从0开始
@@ -100,15 +110,33 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * 用于保存一些状态
      */
     private LayoutState mLayoutState;
+
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
 
     private RecyclerView mRecyclerView;
+
+    private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
+        @Override
+        public void onChildViewAttachedToWindow(@NonNull View view) {
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            if (layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT
+                    || layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+                throw new IllegalStateException("item layout must use match_parent");
+            }
+        }
+
+        @Override
+        public void onChildViewDetachedFromWindow(@NonNull View view) {
+            // nothing
+
+        }
+    };
 
     public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns) {
         this(rows, columns, HORIZONTAL);
     }
 
-    public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns, @RecyclerView.Orientation int orientation) {
+    public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns, @Orientation int orientation) {
         mRows = rows;
         mColumns = columns;
         setOrientation(orientation);
@@ -119,16 +147,34 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      */
     @Override
     public final RecyclerView.LayoutParams generateDefaultLayoutParams() {
-        return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        return new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
     }
 
+    @Override
+    public RecyclerView.LayoutParams generateLayoutParams(Context c, AttributeSet attrs) {
+        return new LayoutParams(c, attrs);
+    }
+
+    @Override
+    public RecyclerView.LayoutParams generateLayoutParams(ViewGroup.LayoutParams lp) {
+        if (lp instanceof ViewGroup.MarginLayoutParams) {
+            return new LayoutParams((ViewGroup.MarginLayoutParams) lp);
+        } else {
+            return new LayoutParams(lp);
+        }
+    }
+
+    @Override
+    public boolean checkLayoutParams(RecyclerView.LayoutParams lp) {
+        return lp instanceof LayoutParams;
+    }
 
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         super.onAttachedToWindow(view);
         mRecyclerView = view;
-//        mRecyclerView.addOnChildAttachStateChangeListener(enforceChildFillListener());
+        mRecyclerView.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
     }
@@ -146,20 +192,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
 
-        ensureLayoutState();
-        mLayoutState.mRecycle = false;
-        mLayoutState.mItemDirection = LayoutState.ITEM_DIRECTION_TAIL;
-        mLayoutState.mLayoutDirection = LayoutState.LAYOUT_END;
-        mLayoutState.mAvailable = getEnd();
-        mLayoutState.mScrollingOffset = LayoutState.SCROLLING_OFFSET_NaN;
-        /*
-        设置绘制的起始位置
-        水平滑动则减去一个View的宽度
-        垂直滑动则减去一个View的高度
-         */
-        mLayoutState.mOffSetX = mOrientation == HORIZONTAL ? getPaddingLeft() - mItemWidth : getPaddingLeft();
-        mLayoutState.mOffSetY = mOrientation == HORIZONTAL ? getPaddingTop() : getPaddingLeft() - mItemHeight;
-
         //回收Views
         detachAndScrapAttachedViews(recycler);
 
@@ -176,6 +208,12 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (getItemCount() % mOnePageSize != 0) {
             ++mPageCount;
         }
+
+        if (DEBUG) {
+            Log.i(TAG, "onLayoutChildren: getRealWidth:" + getRealWidth() + ",getRealHeight:" + getRealHeight() + ",mItemWidth:" + mItemWidth + ",mItemHeight:" + mItemHeight + ",mPageCount:" + mPageCount);
+        }
+        ensureLayoutState();
+
         if (mPendingScrollPosition != RecyclerView.NO_POSITION) {
             mCurrentPagerIndex = getPageIndexByPosition(mPendingScrollPosition);
             mCurrentPagerAnchorPosition = mCurrentPagerIndex * mOnePageSize;
@@ -185,20 +223,31 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             mCurrentPagerAnchorPosition = 0;
             mLayoutState.mCurrentPosition = 0;
         }
-        if (DEBUG) {
-            Log.i(TAG, "onLayoutChildren: getRealWidth:" + getRealWidth() + ",getRealHeight:" + getRealHeight() + ",mItemWidth:" + mItemWidth + ",mItemHeight:" + mItemHeight + ",mPageCount:" + mPageCount);
+
+        mLayoutState.mRecycle = false;
+        mLayoutState.mItemDirection = LayoutState.ITEM_DIRECTION_TAIL;
+        mLayoutState.mLayoutDirection = LayoutState.LAYOUT_END;
+        mLayoutState.mAvailable = getEnd();
+        mLayoutState.mScrollingOffset = LayoutState.SCROLLING_OFFSET_NaN;
+        //计算首个位置的偏移量
+        int left;
+        int top;
+        int right;
+        int bottom;
+        if (mOrientation == RecyclerView.HORIZONTAL) {
+            bottom = getHeight() - getPaddingBottom();
+            right = getPaddingLeft();
+        } else {
+            bottom = getPaddingTop();
+            right = getWidth() - getPaddingRight();
         }
+        top = bottom - mItemHeight;
+        left = right - mItemWidth;
+
+        mLayoutState.setOffsetRect(left, top, right, bottom);
+
         fill(recycler, state);
 
-        View childAt = getChildAt(0);
-        assert childAt != null;
-        System.out.println("getDecoratedMeasuredWidth(childAt):" + getDecoratedMeasuredWidth(childAt));
-        System.out.println("getDecoratedMeasuredHeight(childAt):" + getDecoratedMeasuredHeight(childAt));
-        System.out.println("getDecoratedLeft(childAt):" + getDecoratedLeft(childAt));
-        System.out.println("getDecoratedTop(childAt):" + getDecoratedTop(childAt));
-        System.out.println("getDecoratedRight(childAt):" + getDecoratedRight(childAt));
-        System.out.println("getDecoratedBottom(childAt):" + getDecoratedBottom(childAt));
-//        fill(recycler, state, mCurrentPagerIndex);
         if (DEBUG) {
             Log.i(TAG, "onLayoutChildren: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size());
         }
@@ -212,6 +261,18 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Nullable
     @Override
     public View findViewByPosition(int position) {
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            return null;
+        }
+        final int firstChild = getPosition(getChildAt(0));
+        final int viewPosition = position - firstChild;
+        if (viewPosition >= 0 && viewPosition < childCount) {
+            final View child = getChildAt(viewPosition);
+            if (getPosition(child) == position) {
+                return child;
+            }
+        }
         return super.findViewByPosition(position);
     }
 
@@ -251,7 +312,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         switch (state) {
             case RecyclerView.SCROLL_STATE_IDLE:
                 //停止滑动时
-                Log.i(TAG, "onScrollStateChanged: 总共滑动的距离: " + mScrollDelta);
+//                Log.i(TAG, "onScrollStateChanged: 总共滑动的距离: " + mScrollDelta);
                 mScrollDelta = 0;
                 break;
             case RecyclerView.SCROLL_STATE_DRAGGING:
@@ -280,6 +341,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Override
     public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
         super.onDetachedFromWindow(view, recycler);
+        mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mRecyclerView = null;
     }
 
@@ -320,7 +382,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      *
      * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
      */
-    public void setOrientation(@RecyclerView.Orientation int orientation) {
+    public void setOrientation(@Orientation int orientation) {
         if (!isIdle()) {
             return;
         }
@@ -340,7 +402,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     public int getPageIndexByPosition(int position) {
         return position / mOnePageSize;
     }
-
 
     /**
      * 获取真实宽度
@@ -388,31 +449,20 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             layoutState.mAvailable -= layoutChunkResult.mConsumed;
             remainingSpace -= layoutChunkResult.mConsumed;
             System.out.println("fill->remainingSpace:" + remainingSpace);
-            //回收View
-            if (layoutState.mScrollingOffset != LayoutState.SCROLLING_OFFSET_NaN) {
-                layoutState.mScrollingOffset += layoutChunkResult.mConsumed;
-                if (layoutState.mAvailable < 0) {
-                    layoutState.mScrollingOffset += layoutState.mAvailable;
-                }
-                recycleViews(recycler);
-            }
         }
-
+        boolean layoutToEnd = layoutState.mLayoutDirection == LayoutState.LAYOUT_END;
         //因为最后一列或者一行可能只绘制了收尾的一个，补满
         while (layoutState.hasMore(state)) {
-            if (isNeedMoveToNextSpan(layoutState.mCurrentPosition)) {
+            boolean isNeedMoveSpan = layoutToEnd ? isNeedMoveToNextSpan(layoutState.mCurrentPosition) : isNeedMoveToPreSpan(layoutState.mCurrentPosition);
+            if (isNeedMoveSpan) {
                 //如果需要切换行或列，直接退出
                 break;
             }
             layoutChunk(recycler, state, layoutState, layoutChunkResult);
-            //回收View
-            if (layoutState.mScrollingOffset != LayoutState.SCROLLING_OFFSET_NaN) {
-                layoutState.mScrollingOffset += layoutChunkResult.mConsumed;
-                if (layoutState.mAvailable < 0) {
-                    layoutState.mScrollingOffset += layoutState.mAvailable;
-                }
-                recycleViews(recycler);
-            }
+        }
+        //回收View
+        if (layoutState.mScrollingOffset != LayoutState.SCROLLING_OFFSET_NaN) {
+            recycleViews(recycler);
         }
         return start - layoutState.mAvailable;
     }
@@ -436,85 +486,81 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             addView(view, 0);
         }
         measureChildWithMargins(view, mItemWidthUsed, mItemHeightUsed);
-        //是否需要移动到下一行或者下一列进行绘制
-        boolean isNeedMoveToNextSpan = isNeedMoveToNextSpan(position);
+        //是否需要换行或者换列
+        boolean isNeedMoveSpan = layoutToEnd ? isNeedMoveToNextSpan(position) : isNeedMoveToPreSpan(position);
+
+        layoutChunkResult.mConsumed = isNeedMoveSpan ? (mOrientation == HORIZONTAL ? mItemWidth : mItemHeight) : 0;
+
+        //记录的上一个View的位置
+        Rect rect = layoutState.mOffsetRect;
         int left;
         int top;
         int right;
         int bottom;
-
         if (mOrientation == HORIZONTAL) {
             //水平滑动
             if (layoutToEnd) {
-                if (isNeedMoveToNextSpan) {
+                //向后填充，绘制方向：从上到下
+                if (isNeedMoveSpan) {
                     //下一列绘制，从头部开始
-                    left = layoutState.mOffSetX + mItemWidth;
-                    top = getPaddingTop();
-                    layoutChunkResult.mConsumed = mItemWidth;
+                    left = rect.left + mItemWidth;
+                    top = getPaddingLeft();
                 } else {
                     //当前列绘制
-                    left = layoutState.mOffSetX;
-                    top = layoutState.mOffSetY;
-                    layoutChunkResult.mConsumed = 0;
+                    left = rect.left;
+                    top = rect.bottom;
                 }
                 right = left + mItemWidth;
                 bottom = top + mItemHeight;
-                layoutState.mOffSetY = bottom;
             } else {
-                if (isNeedMoveToNextSpan) {
-                    //上一列绘制，从底部开始
-                    left = layoutState.mOffSetX - mItemWidth;
-                    bottom = getPaddingBottom();
-                    layoutChunkResult.mConsumed = mItemWidth;
+                //向前填充，绘制方向：从下到上
+                if (isNeedMoveSpan) {
+                    //上一列绘制，从底部开启
+                    left = rect.left - mItemWidth;
+                    bottom = getHeight() - getPaddingBottom();
                 } else {
                     //当前列绘制
-                    left = layoutState.mOffSetX;
-                    bottom = layoutState.mOffSetY;
-                    layoutChunkResult.mConsumed = 0;
+                    left = rect.left;
+                    bottom = rect.top;
                 }
                 top = bottom - mItemHeight;
                 right = left + mItemWidth;
-                layoutState.mOffSetY = top;
             }
-            layoutState.mOffSetX = left;
         } else {
+            //垂直滑动
             if (layoutToEnd) {
-                if (isNeedMoveToNextSpan) {
+                //向后填充，绘制方向：从左到右
+                if (isNeedMoveSpan) {
                     //下一行绘制，从头部开始
                     left = getPaddingLeft();
-                    top = layoutState.mOffSetY + mItemHeight;
-                    layoutChunkResult.mConsumed = mItemHeight;
+                    top = rect.bottom;
                 } else {
                     //当前行绘制
-                    left = layoutState.mOffSetX;
-                    top = layoutState.mOffSetY;
-                    layoutChunkResult.mConsumed = 0;
+                    left = rect.left + mItemWidth;
+                    top = rect.top;
                 }
                 right = left + mItemWidth;
                 bottom = top + mItemHeight;
-                layoutState.mOffSetX = right;
             } else {
-                if (isNeedMoveToNextSpan) {
+                //向前填充，绘制方向：从右到左
+                if (isNeedMoveSpan) {
                     //上一行绘制，从尾部开始
-                    right = getPaddingRight();
-                    bottom = layoutState.mOffSetY;
+                    right = getWidth() - getPaddingRight();
                     left = right - mItemWidth;
+                    bottom = rect.top;
                     top = bottom - mItemHeight;
-                    layoutChunkResult.mConsumed = mItemHeight;
                 } else {
                     //当前行绘制
-                    left = layoutState.mOffSetX - mItemWidth;
-                    top = layoutState.mOffSetY;
+                    left = rect.left - mItemWidth;
+                    top = rect.top;
                     right = left + mItemWidth;
                     bottom = top + mItemHeight;
-                    layoutChunkResult.mConsumed = 0;
                 }
-                layoutState.mOffSetX = left;
             }
-            layoutState.mOffSetY = top;
         }
+
+        layoutState.setOffsetRect(left, top, right, bottom);
         layoutDecoratedWithMargins(view, left, top, right, bottom);
-        System.out.println("layoutChunk->mOffSetX: " + layoutState.mOffSetX + ",mOffSetY: " + layoutState.mOffSetY + ",position: " + position + ",mConsumed: " + layoutChunkResult.mConsumed);
     }
 
     /**
@@ -575,20 +621,16 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (layoutToEnd) {
             child = getChildClosestToEnd();
             scrollingOffset = getDecoratedEnd(child) - getEndAfterPadding();
-            updateLayoutStateOffset(child, mLayoutState, true, mOrientation);
         } else {
             child = getChildClosestToStart();
             scrollingOffset = -getDecoratedStart(child) + getStartAfterPadding();
-            updateLayoutStateOffset(child, mLayoutState, false, mOrientation);
         }
-
+        getDecoratedBoundsWithMargins(child, mLayoutState.mOffsetRect);
         mLayoutState.mCurrentPosition = getPosition(child) + mLayoutState.mItemDirection;
-
         mLayoutState.mAvailable = requiredSpace;
         if (canUseExistingSpace) {
             mLayoutState.mAvailable -= scrollingOffset;
         }
-//        System.out.println("updateLayoutState-->layoutToEnd:" + layoutToEnd + ",mCurrentPosition:" + mLayoutState.mCurrentPosition + ",mOffSet:" + mLayoutState.mOffSet + ",scrollingOffset:" + scrollingOffset + ",mAvailable:" + mLayoutState.mAvailable + ",requiredSpace:" + requiredSpace);
         mLayoutState.mScrollingOffset = scrollingOffset;
     }
 
@@ -598,25 +640,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private View getChildClosestToStart() {
         return getChildAt(0);
-    }
-
-    private void updateLayoutStateOffset(View child, LayoutState layoutState, boolean layoutToEnd, int orientation) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
-        if (orientation == HORIZONTAL) {
-            layoutState.mOffSetX = getDecoratedLeft(child) - params.leftMargin;
-            if (layoutToEnd) {
-                layoutState.mOffSetY = getDecoratedBottom(child) + params.bottomMargin;
-            } else {
-                layoutState.mOffSetY = getDecoratedTop(child) - params.topMargin;
-            }
-        } else {
-            layoutState.mOffSetY = getDecoratedTop(child) - params.topMargin;
-            if (layoutToEnd) {
-                layoutState.mOffSetX = getDecoratedRight(child) + params.rightMargin;
-            } else {
-                layoutState.mOffSetY = getDecoratedLeft(child) - params.leftMargin;
-            }
-        }
     }
 
     /**
@@ -629,7 +652,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (!mLayoutState.mRecycle) {
             return;
         }
-        int scrollingOffset = mLayoutState.mScrollingOffset;
         if (mLayoutState.mLayoutDirection == LayoutState.LAYOUT_START) {
             //水平向左或者垂直向上滑动
             recycleViewsFromEnd(recycler);
@@ -668,12 +690,12 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     private int getDecoratedEnd(View child) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+        final LayoutParams params = (LayoutParams) child.getLayoutParams();
         return mOrientation == HORIZONTAL ? getDecoratedRight(child) + params.rightMargin : getDecoratedBottom(child) + params.bottomMargin;
     }
 
     private int getDecoratedStart(View child) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+        final LayoutParams params = (LayoutParams) child.getLayoutParams();
         return mOrientation == HORIZONTAL ? getDecoratedLeft(child) - params.leftMargin : getDecoratedTop(child) - params.topMargin;
     }
 
@@ -700,92 +722,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         } else {
             offsetChildrenVertical(delta);
         }
-    }
-
-    /**
-     * 根据position 获取在全局中的坐标，注意不是在当前页的位置
-     * 水平滑动：
-     * |0 4 8 | 12 16
-     * |1 5 9 | 13 17        4行*3列
-     * |2 6 10| 14 18
-     * |3 7 11| 15
-     * <p>
-     * 垂直滑动：
-     * ————————————
-     * 0  1  2  3
-     * 4  5  6  7             3行*4列
-     * 8  9  10 11
-     * ————————————
-     * 12 13 14
-     *
-     * @param position position
-     * @return int[0]:行坐标位置,从0开始;int[1]:列坐标位置，从0开始
-     */
-    @NonNull
-    private int[] getGlobalCoordinateByPosition(int position) {
-        int[] coordinate = new int[2];
-        if (getItemCount() == 0 || position >= getItemCount()) {
-            return coordinate;
-        }
-        int rows = mRows;
-        int columns = mColumns;
-        int rowPosition;
-        int columnPosition;
-        if (mOrientation == HORIZONTAL) {
-            rowPosition = position % rows;
-            columnPosition = position / rows;
-        } else {
-            rowPosition = position / columns;
-            columnPosition = position % columns;
-        }
-        //行位置，从0开始
-        coordinate[0] = rowPosition;
-        //列位置，从0开始
-        coordinate[1] = columnPosition;
-        return coordinate;
-    }
-
-    /**
-     * 根据position在当前页的位置
-     * 水平滑动：
-     * |0 4 8 | 12 16
-     * |1 5 9 | 13 17        4行*3列
-     * |2 6 10| 14 18
-     * |3 7 11| 15
-     * <p>
-     * 垂直滑动：
-     * ————————————
-     * 0  1  2  3
-     * 4  5  6  7             3行*4列
-     * 8  9  10 11
-     * ————————————
-     * 12 13 14
-     *
-     * @param position position
-     * @return int[0]:行坐标位置,从0开始;int[1]:列坐标位置，从0开始
-     */
-    @NonNull
-    private int[] getCoordinateByPosition(int position) {
-        int[] coordinate = new int[2];
-        if (getItemCount() == 0 || position >= getItemCount()) {
-            return coordinate;
-        }
-        int rows = mRows;
-        int columns = mColumns;
-        int rowPosition;
-        int columnPosition;
-        if (mOrientation == HORIZONTAL) {
-            rowPosition = position % rows;
-            columnPosition = position / rows % columns;
-        } else {
-            rowPosition = position / columns % rows;
-            columnPosition = position % columns;
-        }
-        //行位置，从0开始
-        coordinate[0] = rowPosition;
-        //列位置，从0开始
-        coordinate[1] = columnPosition;
-        return coordinate;
     }
 
     /**
@@ -827,6 +763,14 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return mOrientation == HORIZONTAL ? position % mRows == 0 : position % mColumns == 0;
     }
 
+    /**
+     * @param position
+     * @return 是否需要换到下一行或列
+     */
+    private boolean isNeedMoveToPreSpan(int position) {
+        return mOrientation == HORIZONTAL ? position % mRows == mRows - 1 : position % mColumns == mColumns - 1;
+    }
+
     @Nullable
     @Override
     public PointF computeScrollVectorForPosition(int targetPosition) {
@@ -837,24 +781,28 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return null;
     }
 
-    private RecyclerView.OnChildAttachStateChangeListener enforceChildFillListener() {
-        return new RecyclerView.OnChildAttachStateChangeListener() {
-            @Override
-            public void onChildViewAttachedToWindow(@NonNull View view) {
-                RecyclerView.LayoutParams layoutParams =
-                        (RecyclerView.LayoutParams) view.getLayoutParams();
-                if (layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT
-                        || layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
-                    throw new IllegalStateException(
-                            "Pages must fill the whole PagerGridLayoutManager (use match_parent)");
-                }
-            }
+    public static class LayoutParams extends RecyclerView.LayoutParams {
 
-            @Override
-            public void onChildViewDetachedFromWindow(@NonNull View view) {
-                // nothing
-            }
-        };
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+        }
+
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public LayoutParams(ViewGroup.MarginLayoutParams source) {
+            super(source);
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+
+        public LayoutParams(RecyclerView.LayoutParams source) {
+            super(source);
+        }
+
     }
 
     protected static class LayoutState {
@@ -893,19 +841,27 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
          */
         int mScrollingOffset;
 
-        int mOffSetX;
-        int mOffSetY;
+        Rect mOffsetRect;
 
         int mLastScrollDelta;
 
+        protected LayoutState() {
+        }
 
-        private View next(RecyclerView.Recycler recycler) {
+        protected void setOffsetRect(int left, int top, int right, int bottom) {
+            if (mOffsetRect == null) {
+                mOffsetRect = new Rect();
+            }
+            mOffsetRect.set(left, top, right, bottom);
+        }
+
+        protected View next(RecyclerView.Recycler recycler) {
             View view = recycler.getViewForPosition(mCurrentPosition);
             mCurrentPosition += mItemDirection;
             return view;
         }
 
-        boolean hasMore(RecyclerView.State state) {
+        protected boolean hasMore(RecyclerView.State state) {
             return mCurrentPosition >= 0 && mCurrentPosition < state.getItemCount();
         }
     }

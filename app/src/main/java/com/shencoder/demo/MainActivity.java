@@ -2,8 +2,6 @@ package com.shencoder.demo;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -12,8 +10,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.chad.library.adapter.base.listener.OnItemClickListener;
 import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
 
 import java.util.ArrayList;
@@ -35,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
         rv.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.set(30, 30, 30, 30);
+                outRect.set(5, 5, 5, 5);
             }
         });
-        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(4, 5, PagerGridLayoutManager.VERTICAL);
+        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(3, 4, PagerGridLayoutManager.VERTICAL);
 //        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 //        GridLayoutManager layoutManager =new GridLayoutManager(this,4);
         rv.setLayoutManager(layoutManager);
@@ -46,16 +42,16 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnItemClickListener((adapter1, view, position) -> Toast.makeText(MainActivity.this, "点击了第" + position + "个位置", Toast.LENGTH_SHORT).show());
         rv.setAdapter(adapter);
 
-//        TestAdapter vpAdapter = new TestAdapter();
-//        vp.setAdapter(vpAdapter);
+        TestAdapter vpAdapter = new TestAdapter();
+        vp.setAdapter(vpAdapter);
 
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i <=100; i++) {
+        for (int i = 0; i <= 100000; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
 
-//        vpAdapter.setList(list);
+        vpAdapter.setList(list);
         findViewById(R.id.btnMove).setOnClickListener(v -> adapter.removeAt(3));
     }
 }
