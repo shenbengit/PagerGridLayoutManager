@@ -1,8 +1,11 @@
 package com.shencoder.pagergridlayoutmanager;
 
-import android.content.Context;
+import android.util.DisplayMetrics;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * @author ShenBen
@@ -10,9 +13,34 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
  * @email 714081644@qq.com
  */
 public class PagerGridSmoothScroller extends LinearSmoothScroller {
+    private static final String TAG = "PagerGridSmoothScroller";
+    private RecyclerView mRecyclerView;
 
-    public PagerGridSmoothScroller(Context context) {
-        super(context);
+    public PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
+        super(recyclerView.getContext());
+        mRecyclerView = recyclerView;
     }
 
+    /**
+     * 该方法会在targetSnapView被layout出来的时候调用。
+     *
+     * @param targetView targetSnapView
+     * @param state
+     * @param action
+     */
+    @Override
+    protected void onTargetFound(View targetView, RecyclerView.State state, Action action) {
+        super.onTargetFound(targetView, state, action);
+    }
+
+    /**
+     * 该方法是计算滚动速率的，返回值代表滚动速率
+     *
+     * @param displayMetrics
+     * @return
+     */
+    @Override
+    protected float calculateSpeedPerPixel(DisplayMetrics displayMetrics) {
+        return super.calculateSpeedPerPixel(displayMetrics);
+    }
 }
