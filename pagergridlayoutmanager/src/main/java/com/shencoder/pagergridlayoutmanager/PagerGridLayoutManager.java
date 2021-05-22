@@ -109,6 +109,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         @Override
         public void onChildViewAttachedToWindow(@NonNull View view) {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            //判断ItemLayout的宽高是否是match_parent
             if (layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT
                     || layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
                 throw new IllegalStateException("item layout must use match_parent");
@@ -132,12 +133,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     /**
-     * @return 子布局LayoutParams，默认全部填充
+     * @return 子布局LayoutParams，默认全部填充，子布局会根据{@link #mRows}和{@link #mColumns} 均分RecyclerView
      */
     @Override
     public final RecyclerView.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        return new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     }
 
     @Override
@@ -168,6 +168,17 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mRecyclerView.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
+    }
+
+    @Override
+    public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state, int widthSpec, int heightSpec) {
+        int widthMode = View.MeasureSpec.getMode(widthSpec);
+        int heightMode = View.MeasureSpec.getMode(heightSpec);
+        //判断RecyclerView的宽度和高度是不是精确值
+        if (widthMode != View.MeasureSpec.EXACTLY || heightMode != View.MeasureSpec.EXACTLY) {
+            throw new IllegalStateException("RecyclerView's width and height must be exactly");
+        }
+        super.onMeasure(recycler, state, widthSpec, heightSpec);
     }
 
     @Override
@@ -226,7 +237,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             mLayoutState.replenishDelta = replenish;
         }
 
-        if (mCurrentPagerIndex > getPageIndexByPosition(state.getItemCount() - 1)) {
+        if (mCurrentPagerIndex > getPagerIndexByPosition(state.getItemCount() - 1)) {
             mCurrentPagerIndex = 0;
         }
 
@@ -266,7 +277,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     @Override
     public void onLayoutCompleted(RecyclerView.State state) {
-
+        setPageCount(mPageCount);
     }
 
     @Nullable
@@ -289,20 +300,45 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     @Override
     public void scrollToPosition(int position) {
+        if (!isIdle()) {
+            return;
+        }
         ensureLayoutState();
         //先找到目标position所在第几页
-        int pageIndex = getPageIndexByPosition(position);
-        if (pageIndex == mCurrentPagerIndex) {
+        int pagerIndex = getPagerIndexByPosition(position);
+        pagerIndex = Math.min(pagerIndex, mPageCount);
+        if (pagerIndex == mCurrentPagerIndex) {
             //同一页直接return
             return;
         }
-        mCurrentPagerIndex = pageIndex;
+        mCurrentPagerIndex = pagerIndex;
         requestLayout();
     }
 
     @Override
     public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+        if (!isIdle()) {
+            return;
+        }
+        ensureLayoutState();
+        //先找到目标position所在第几页
+        int pagerIndex = getPagerIndexByPosition(position);
+        pagerIndex = Math.min(pagerIndex, mPageCount);
+        int previousIndex = mCurrentPagerIndex;
+        if (pagerIndex == previousIndex) {
+            //同一页直接return
+            return;
+        }
 
+        if (Math.abs(pagerIndex - previousIndex) > 3) {
+            mCurrentPagerIndex = pagerIndex > previousIndex ? pagerIndex - 3 : previousIndex - 3;
+            requestLayout();
+            if (mRecyclerView != null) {
+                mRecyclerView.post(new SmoothScrollToPosition(pagerIndex, this, mRecyclerView));
+            }
+        } else {
+            mCurrentPagerIndex = pagerIndex;
+        }
     }
 
     @Override
@@ -403,8 +439,42 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * @param position position
      * @return 获取当前position所在页下标
      */
-    public int getPageIndexByPosition(int position) {
+    public int getPagerIndexByPosition(int position) {
         return position / mOnePageSize;
+    }
+
+    /**
+     * 直接滚到第几页
+     *
+     * @param pagerIndex 第几页
+     */
+    public void scrollToPager(@IntRange(from = 0) int pagerIndex) {
+        pagerIndex = Math.min(pagerIndex, mPageCount);
+    }
+
+    public void scrollToPrePager() {
+
+    }
+
+    public void scrollToNextPager() {
+
+    }
+
+    /**
+     * 直接滚到第几页
+     *
+     * @param pagerIndex 第几页
+     */
+    public void smoothScrollToPager(@IntRange(from = 0) int pagerIndex) {
+        pagerIndex = Math.min(pagerIndex, mPageCount);
+    }
+
+    public void smoothScrollToPrePager() {
+
+    }
+
+    public void smoothScrollToNextPager() {
+
     }
 
     /**
@@ -852,16 +922,23 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private static class SmoothScrollToPosition implements Runnable {
         private final int mPosition;
+        @NonNull
+        private PagerGridLayoutManager mLayoutManager;
+        @NonNull
         private final RecyclerView mRecyclerView;
 
-        SmoothScrollToPosition(int position, RecyclerView recyclerView) {
+        SmoothScrollToPosition(int position, @NonNull PagerGridLayoutManager layoutManager, @NonNull RecyclerView recyclerView) {
             mPosition = position;
+            mLayoutManager = layoutManager;
             mRecyclerView = recyclerView;
         }
 
         @Override
         public void run() {
-            mRecyclerView.smoothScrollToPosition(mPosition);
+            mLayoutManager.mCurrentPagerIndex = mPosition;
+            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
+            smoothScroller.setTargetPosition(mPosition);
+            mLayoutManager.startSmoothScroll(smoothScroller);
         }
     }
 

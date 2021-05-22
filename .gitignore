@@ -12,3 +12,5 @@
 /captures
 .externalNativeBuild
 .cxx
+/.idea/compiler.xml
+/.idea/qaplug_profiles.xml

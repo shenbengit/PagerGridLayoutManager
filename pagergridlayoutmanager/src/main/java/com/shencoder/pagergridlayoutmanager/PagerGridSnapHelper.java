@@ -28,16 +28,22 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Nullable
     @Override
     public int[] calculateDistanceToFinalSnap(@NonNull RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
-        final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
         int[] snapDistance = new int[2];
+        if (layoutManager instanceof PagerGridLayoutManager) {
+            final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
+
+        }
         return snapDistance;
     }
 
     @Nullable
     @Override
     public View findSnapView(RecyclerView.LayoutManager layoutManager) {
-        final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
-        return manager.findSnapView();
+        if (layoutManager instanceof PagerGridLayoutManager) {
+            final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
+            return manager.findSnapView();
+        }
+        return null;
     }
 
     @Override
@@ -47,7 +53,9 @@ public class PagerGridSnapHelper extends SnapHelper {
         if (itemCount == 0) {
             return RecyclerView.NO_POSITION;
         }
-
+        if (!(layoutManager instanceof PagerGridLayoutManager)) {
+            return RecyclerView.NO_POSITION;
+        }
         final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
         int targetPosition = RecyclerView.NO_POSITION;
         int minFlingVelocity = manager.getEnd();
@@ -70,6 +78,9 @@ public class PagerGridSnapHelper extends SnapHelper {
         }
         if (mRecyclerView.getAdapter() == null) {
             return false;
+        }
+        if (!(layoutManager instanceof PagerGridLayoutManager)) {
+            return super.onFling(velocityX, velocityY);
         }
         PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
         int minFlingVelocity = manager.getEnd();
@@ -98,7 +109,7 @@ public class PagerGridSnapHelper extends SnapHelper {
 
     @Nullable
     @Override
-    protected RecyclerView.SmoothScroller createScroller(RecyclerView.LayoutManager layoutManager) {
+    protected RecyclerView.SmoothScroller createScroller(@NonNull RecyclerView.LayoutManager layoutManager) {
         if (!(layoutManager instanceof RecyclerView.SmoothScroller.ScrollVectorProvider)) {
             return null;
         }
