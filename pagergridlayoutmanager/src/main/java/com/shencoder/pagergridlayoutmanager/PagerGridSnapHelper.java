@@ -28,10 +28,10 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Nullable
     @Override
     public int[] calculateDistanceToFinalSnap(@NonNull RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
+        Log.i(TAG, "calculateDistanceToFinalSnap-targetView: " + layoutManager.getPosition(targetView));
         int[] snapDistance = new int[2];
         if (layoutManager instanceof PagerGridLayoutManager) {
             final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
-
         }
         return snapDistance;
     }
@@ -39,6 +39,7 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Nullable
     @Override
     public View findSnapView(RecyclerView.LayoutManager layoutManager) {
+        Log.i(TAG, "findSnapView: ");
         if (layoutManager instanceof PagerGridLayoutManager) {
             final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
             return manager.findSnapView();
@@ -58,13 +59,17 @@ public class PagerGridSnapHelper extends SnapHelper {
         }
         final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
         int targetPosition = RecyclerView.NO_POSITION;
-        int minFlingVelocity = manager.getEnd();
+        int minFlingVelocity = manager.getMinFlingVelocity();
         if (manager.canScrollHorizontally()) {
             int absVelocityX = Math.abs(velocityX);
+            if (absVelocityX > minFlingVelocity) {
 
+            }
         } else {
             int absVelocityY = Math.abs(velocityY);
+            if (absVelocityY > minFlingVelocity) {
 
+            }
         }
         return targetPosition;
     }
@@ -83,7 +88,7 @@ public class PagerGridSnapHelper extends SnapHelper {
             return super.onFling(velocityX, velocityY);
         }
         PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
-        int minFlingVelocity = manager.getEnd();
+        int minFlingVelocity = manager.getMinFlingVelocity();
         return (Math.abs(velocityY) > minFlingVelocity || Math.abs(velocityX) > minFlingVelocity)
                 && snapFromFling(layoutManager, velocityX, velocityY);
     }
@@ -110,6 +115,7 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Nullable
     @Override
     protected RecyclerView.SmoothScroller createScroller(@NonNull RecyclerView.LayoutManager layoutManager) {
+        Log.i(TAG, "createScroller: ");
         if (!(layoutManager instanceof RecyclerView.SmoothScroller.ScrollVectorProvider)) {
             return null;
         }

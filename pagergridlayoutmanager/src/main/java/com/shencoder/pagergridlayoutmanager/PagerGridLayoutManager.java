@@ -333,11 +333,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (Math.abs(pagerIndex - previousIndex) > 3) {
             mCurrentPagerIndex = pagerIndex > previousIndex ? pagerIndex - 3 : previousIndex - 3;
             requestLayout();
-            if (mRecyclerView != null) {
-                mRecyclerView.post(new SmoothScrollToPosition(pagerIndex, this, mRecyclerView));
-            }
         } else {
             mCurrentPagerIndex = pagerIndex;
+        }
+        if (mRecyclerView != null) {
+            mRecyclerView.post(new SmoothScrollToPosition(pagerIndex * mOnePageSize, this, mRecyclerView));
         }
     }
 
@@ -811,16 +811,42 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return null;
         }
         int delta = mLayoutState.mLastScrollDelta;
+        //是否是向尾部布局
         boolean layoutToEnd = delta >= 0;
-        int targetPosition;
-        targetPosition = mCurrentPagerIndex * mOnePageSize;
-        if (!layoutToEnd) {
-            --targetPosition;
+        //目标位置
+        int targetPosition = RecyclerView.NO_POSITION;
+        View childView = null;
+        if (layoutToEnd) {
+            //向尾部布局
+            for (int i = count - 1; i >= 0; i--) {
+                childView = getChildAt(i);
+                if (childView == null) {
+                    continue;
+                }
+                if (getPosition(childView) % mOnePageSize == 0) {
+                    targetPosition = i;
+                    break;
+                }
+            }
+        } else {
+            //向头部布局
+            for (int i = 0; i < count; i++) {
+                childView = getChildAt(i);
+                if (childView == null) {
+                    continue;
+                }
+                if (getPosition(childView) % mOnePageSize == mOnePageSize - 1) {
+                    targetPosition = i;
+                    break;
+                }
+            }
         }
-        if (targetPosition < 0) {
-            targetPosition = 0;
-        }
-        return getChildAt(targetPosition);
+        Log.i("PagerGridSnapHelper", "findSnapView-targetPosition: " + targetPosition + ",layoutToEnd: " + layoutToEnd);
+        return childView;
+    }
+
+    int getMinFlingVelocity() {
+        return getEnd();
     }
 
     /**
@@ -886,11 +912,17 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Nullable
     @Override
     public PointF computeScrollVectorForPosition(int targetPosition) {
-        if (getItemCount() == 0) {
+        if (getChildCount() == 0) {
             return null;
         }
-
-        return null;
+        final int firstChildPos = getPosition(getChildAt(0));
+        final int direction = targetPosition < firstChildPos ? -1 : 1;
+        if (mOrientation == HORIZONTAL) {
+            return new PointF(direction, 0);
+        } else {
+            return new PointF(0, direction);
+        }
+//        return null;
     }
 
     /**
@@ -935,7 +967,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
         @Override
         public void run() {
-            mLayoutManager.mCurrentPagerIndex = mPosition;
+            mLayoutManager.mCurrentPagerIndex = mLayoutManager.getPagerIndexByPosition(mPosition);
             PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
             smoothScroller.setTargetPosition(mPosition);
             mLayoutManager.startSmoothScroll(smoothScroller);

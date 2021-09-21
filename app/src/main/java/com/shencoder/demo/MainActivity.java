@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 //        PagerSnapHelper snapHelper=new PagerSnapHelper();
 //        snapHelper.attachToRecyclerView(vp);
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i <= 18; i++) {
+        for (int i = 0; i <= 180; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 //        vpAdapter.setList(list);
         findViewById(R.id.btnMove).setOnClickListener(v -> {
 //            adapter.addData(new TestBean(111,"123"));
-            rv.scrollToPosition(13);
+            rv.smoothScrollToPosition(23);
         });
     }
 }

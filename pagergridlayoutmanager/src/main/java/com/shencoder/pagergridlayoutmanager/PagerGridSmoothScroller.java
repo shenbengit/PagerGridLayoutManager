@@ -1,6 +1,7 @@
 package com.shencoder.pagergridlayoutmanager;
 
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,15 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
      */
     @Override
     protected void onTargetFound(View targetView, RecyclerView.State state, Action action) {
-        super.onTargetFound(targetView, state, action);
+        Log.i(TAG, "onTargetFound-targetView: ");
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof PagerGridLayoutManager) {
+            PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
+            int targetPosition = manager.getPosition(targetView);
+
+        } else {
+            super.onTargetFound(targetView, state, action);
+        }
     }
 
     /**
