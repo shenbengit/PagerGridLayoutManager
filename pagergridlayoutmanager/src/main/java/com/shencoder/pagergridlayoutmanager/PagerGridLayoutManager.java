@@ -103,6 +103,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
 
+    private final Rect mSnapRect = new Rect();
+
     private RecyclerView mRecyclerView;
 
     private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
@@ -264,12 +266,12 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         top = bottom - mItemHeight;
         left = right - mItemWidth;
         mLayoutState.setOffsetRect(left, top, right, bottom);
+        mSnapRect.set(getPaddingStart(), getPaddingTop(), getPaddingStart() + mItemWidth, getPaddingTop() + mItemHeight);
 
         //回收views
         detachAndScrapAttachedViews(recycler);
         //填充views
         fill(recycler, state);
-
         if (DEBUG) {
             Log.i(TAG, "onLayoutChildren: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size() + ",mLayoutState.replenishDelta:" + mLayoutState.replenishDelta);
         }
@@ -333,12 +335,16 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (Math.abs(pagerIndex - previousIndex) > 3) {
             mCurrentPagerIndex = pagerIndex > previousIndex ? pagerIndex - 3 : previousIndex - 3;
             requestLayout();
+            if (mRecyclerView != null) {
+                mRecyclerView.post(new SmoothScrollToPosition(pagerIndex * mOnePageSize, this, mRecyclerView));
+            }
         } else {
             mCurrentPagerIndex = pagerIndex;
+            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
+            smoothScroller.setTargetPosition(pagerIndex * mOnePageSize);
+            startSmoothScroll(smoothScroller);
         }
-        if (mRecyclerView != null) {
-            mRecyclerView.post(new SmoothScrollToPosition(pagerIndex * mOnePageSize, this, mRecyclerView));
-        }
+
     }
 
     @Override
@@ -690,7 +696,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         offsetChildren(-scrolled);
         mLayoutState.mLastScrollDelta = scrolled;
         if (DEBUG) {
-            Log.i(TAG, "scrollBy: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size());
+            Log.i(TAG, "scrollBy: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size() + ",delta:" + delta + ",scrolled:" + scrolled);
         }
         return scrolled;
     }
@@ -793,6 +799,13 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     int getEnd() {
         return mOrientation == HORIZONTAL ? getRealWidth() : getRealHeight();
+    }
+
+    /**
+     * @return
+     */
+    Rect getSnapRect() {
+        return mSnapRect;
     }
 
     /**
@@ -916,13 +929,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return null;
         }
         final int firstChildPos = getPosition(getChildAt(0));
-        final int direction = targetPosition < firstChildPos ? -1 : 1;
-        if (mOrientation == HORIZONTAL) {
-            return new PointF(direction, 0);
-        } else {
-            return new PointF(0, direction);
+        if (firstChildPos == targetPosition) {
+            return null;
         }
-//        return null;
+        final float direction = targetPosition < firstChildPos ? -1f : 1f;
+        if (mOrientation == HORIZONTAL) {
+            return new PointF(direction, 0f);
+        } else {
+            return new PointF(0f, direction);
+        }
     }
 
     /**

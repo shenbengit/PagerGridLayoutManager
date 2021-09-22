@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity {
     private RecyclerView rv;
-    private RecyclerView vp;
+    private ViewPager2 vp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,22 +46,19 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnItemClickListener((adapter1, view, position) -> Toast.makeText(MainActivity.this, "点击了第" + position + "个位置", Toast.LENGTH_SHORT).show());
         rv.setAdapter(adapter);
 
-//        TestAdapter vpAdapter = new TestAdapter();
-//        vp.setAdapter(vpAdapter);
-//        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-//        vp.setLayoutManager(layoutManager);
-//        PagerSnapHelper snapHelper=new PagerSnapHelper();
-//        snapHelper.attachToRecyclerView(vp);
+        TestAdapter vpAdapter = new TestAdapter();
+        vp.setAdapter(vpAdapter);
         List<TestBean> list = new ArrayList<>();
         for (int i = 0; i <= 180; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
 
-//        vpAdapter.setList(list);
+        vpAdapter.setList(list);
         findViewById(R.id.btnMove).setOnClickListener(v -> {
 //            adapter.addData(new TestBean(111,"123"));
-            rv.smoothScrollToPosition(23);
+            rv.smoothScrollToPosition(30);
+//            vp.setCurrentItem(30);
         });
     }
 }
