@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 
@@ -104,6 +106,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
 
     private final Rect mSnapRect = new Rect();
+    private final Rect mLayoutToStartSnapRect = new Rect();
+
 
     private RecyclerView mRecyclerView;
 
@@ -368,8 +372,17 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     @Override
     public void onScrollStateChanged(int state) {
-        if (state == RecyclerView.SCROLL_STATE_IDLE) {
+        Log.i("PagerGridSnapHelper", "onScrollStateChanged: "+state);
+        switch (state){
+            case RecyclerView.SCROLL_STATE_IDLE://静止状态
 
+                break;
+            case RecyclerView.SCROLL_STATE_DRAGGING://手指拖拽
+
+                break;
+            case RecyclerView.SCROLL_STATE_SETTLING://自由滚动
+
+                break;
         }
     }
 
@@ -389,6 +402,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper.attachToRecyclerView(null);
         mRecyclerView = null;
+    }
+
+    /**
+     * 一页的数量
+     *
+     * @return
+     */
+    public int getOnePageSize() {
+        return mOnePageSize;
     }
 
     public void setColumns(@IntRange(from = 1) int columns) {
@@ -829,6 +851,28 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         //目标位置
         int targetPosition = RecyclerView.NO_POSITION;
         View childView = null;
+//        List<View> snapList = new ArrayList<>();
+//        for (int i = 0; i < count; i++) {
+//            View child = getChildAt(i);
+//            if (child == null) {
+//                continue;
+//            }
+//            if (getPosition(child) % mOnePageSize == 0) {
+//                snapList.add(child);
+//                break;
+//            }
+//        }
+//        if (snapList.isEmpty()) {
+//            return null;
+//        }
+//        if (snapList.size() == 1) {
+//            return snapList.get(0);
+//        }
+//        if (layoutToEnd) {
+//
+//        } else {
+//
+//        }
         if (layoutToEnd) {
             //向尾部布局
             for (int i = count - 1; i >= 0; i--) {

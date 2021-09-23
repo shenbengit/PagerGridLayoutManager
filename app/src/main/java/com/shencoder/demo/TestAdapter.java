@@ -1,13 +1,16 @@
 package com.shencoder.demo;
 
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.viewholder.BaseViewHolder;
+import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
 
 
 /**
@@ -29,7 +32,16 @@ public class TestAdapter extends BaseQuickAdapter<TestBean, BaseViewHolder> {
 
     @Override
     protected void convert(@NonNull BaseViewHolder holder, TestBean testBean) {
-        Log.i(TAG, "convert: " + (holder.getLayoutPosition() - getHeaderLayoutCount()));
+        int position = holder.getLayoutPosition() - getHeaderLayoutCount();
+        Log.i(TAG, "convert: " + position);
+        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+        if (layoutManager instanceof PagerGridLayoutManager) {
+            if (position % ((PagerGridLayoutManager) layoutManager).getOnePageSize() == 0) {
+                holder.setTextColor(R.id.tvItem, Color.RED);
+            } else {
+                holder.setTextColor(R.id.tvItem, Color.WHITE);
+            }
+        }
         holder.setText(R.id.tvItem, testBean.getName());
     }
 }

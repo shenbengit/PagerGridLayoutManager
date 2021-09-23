@@ -19,7 +19,7 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
     private static final String TAG = "PagerGridSmoothScroller";
 
     private final RecyclerView mRecyclerView;
-    private static final float MILLISECONDS_PER_INCH = 150f;
+    private static final float MILLISECONDS_PER_INCH = 200f;
     private static final int MAX_SCROLL_ON_FLING_DURATION = 500; //ms
 
     public PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
