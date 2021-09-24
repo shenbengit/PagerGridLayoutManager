@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +21,10 @@ public class PagerGridSnapHelper extends SnapHelper {
 
     private static final int THRESHOLD = 1;
     private RecyclerView mRecyclerView;
+    /**
+     * 存放锚点位置的view，一般数量为1或2个
+     */
+    private final List<View> snapList = new ArrayList<>(2);
 
     @Override
     public void attachToRecyclerView(@Nullable RecyclerView recyclerView) throws IllegalStateException {
@@ -45,6 +48,7 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Override
     public int findTargetSnapPosition(RecyclerView.LayoutManager layoutManager, int velocityX, int velocityY) {
         Log.d(TAG, "findTargetSnapPosition->velocityX: " + velocityX + ",velocityY: " + velocityY);
+        snapList.clear();
         final int itemCount = layoutManager.getItemCount();
         if (itemCount == 0) {
             return RecyclerView.NO_POSITION;
@@ -61,8 +65,6 @@ public class PagerGridSnapHelper extends SnapHelper {
         //计算滑动的距离
         int scrollDistance = manager.canScrollHorizontally() ? calculateScrollDistance[0] : calculateScrollDistance[1];
 
-        //存放锚点位置的view，一般数量为1或2个
-        List<View> snapList = new ArrayList<>();
         for (int i = 0; i < childCount; i++) {
             View child = manager.getChildAt(i);
             if (child == null) {
@@ -77,58 +79,144 @@ public class PagerGridSnapHelper extends SnapHelper {
         //滑动方向是否向前
         final boolean forwardDirection = isForwardFling(manager, velocityX, velocityY);
         //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
-        final int layoutCenter = getLayoutStartAfterPadding(manager) + getLayoutTotalSpace(manager) / 2;
+        final int layoutCenter = getLayoutCenter(manager);
         //目标位置
         int targetPosition = RecyclerView.NO_POSITION;
         switch (snapList.size()) {
             case 1: {
-                //数量为1：锚点view肯定是完全显示的，而且view新绘制进来的
                 View view = snapList.get(0);
-                int distance = distanceToCenter(manager, view);
-
-                if (forwardDirection ? distance >= 0 : distance <= 0) {
-                    int position = manager.getPosition(view);
-                    //寻找上一个锚点位置
-                    targetPosition = position - manager.getOnePageSize();
-                    if (targetPosition < 0) {
-                        targetPosition = RecyclerView.NO_POSITION;
+                int position = manager.getPosition(view);
+                int viewDecoratedStart = getViewDecoratedStart(manager, view);
+                if (forwardDirection) {
+                    //方向向前
+                    if (scrollDistance >= layoutCenter) {
+                        //计算滑动的距离直接超过布局一半值
+                        targetPosition = position;
+                    } else {
+                        if (viewDecoratedStart - scrollDistance <= layoutCenter) {
+                            //view的起始线-scrollDistance 小于中间线，
+                            //即view在中间线的左边或者上边
+                            targetPosition = position;
+                        } else {
+                            //寻找上一个锚点位置
+                            targetPosition = position - manager.getOnePageSize();
+                            if (targetPosition < 0) {
+                                targetPosition = RecyclerView.NO_POSITION;
+                            }
+                        }
                     }
                 } else {
-                    targetPosition = manager.getPosition(view);
+                    if (Math.abs(scrollDistance) >= layoutCenter) {
+                        //寻找上一个锚点位置
+                        targetPosition = position - manager.getOnePageSize();
+                        if (targetPosition < 0) {
+                            targetPosition = RecyclerView.NO_POSITION;
+                        }
+                    } else {
+                        if (viewDecoratedStart + Math.abs(scrollDistance) < layoutCenter) {
+                            //view的起始线+scrollDistance 小于中间线，
+                            //即view在中间线的左边或者上边
+                            targetPosition = position;
+                        } else {
+                            //寻找上一个锚点位置
+                            targetPosition = position - manager.getOnePageSize();
+                            if (targetPosition < 0) {
+                                targetPosition = RecyclerView.NO_POSITION;
+                            }
+                        }
+                    }
                 }
                 break;
             }
             case 2: {
-                //数量为2：锚点view肯定不是完全显示的
                 View view1 = snapList.get(0);
-                int distance1 = distanceToCenter(manager, view1);
+                int viewDecoratedStart1 = getViewDecoratedStart(manager, view1);
+                int position1 = manager.getPosition(view1);
                 View view2 = snapList.get(1);
-                int distance2 = distanceToCenter(manager, view2);
-
-                //distance1肯定是小于layoutCenter
-                //distance2可能是小于、等于、大于layoutCenter
-                targetPosition = manager.getPosition(view1);
+                int viewDecoratedStart2 = getViewDecoratedStart(manager, view2);
+                int position2 = manager.getPosition(view2);
                 if (forwardDirection) {
-                    //判断谁离中心位置距离最近且view2的中心线在layoutCenter的前面
-                    if (manager.getOnePageSize() == 1) {
-                        //这种情况比较特殊，1行x1列的情况
-                        if (Math.abs(distance1) > Math.abs(distance2)) {
-                            targetPosition = manager.getPosition(view2);
+                    //方向向前
+                    if (scrollDistance >= layoutCenter) {
+                        //计算滑动的距离直接超过布局一半值
+                        targetPosition = position2;
+                    } else {
+                        if (viewDecoratedStart2 - scrollDistance <= layoutCenter) {
+                            //view的起始线-scrollDistance 小于中间线，
+                            //即view在中间线的左边或者上边
+                            targetPosition = position2;
+                        } else {
+                            targetPosition = position1;
                         }
                     }
                 } else {
-
-                    targetPosition = Math.abs(distance2) <= Math.abs(distance1) && distance2 < 0 ?
-                            manager.getPosition(view2) : manager.getPosition(view1);
+                    if (Math.abs(scrollDistance) >= layoutCenter) {
+                        //寻找上一个锚点位置
+                        targetPosition = position1;
+                    } else {
+                        if (viewDecoratedStart2 + Math.abs(scrollDistance) < layoutCenter) {
+                            //view的起始线+scrollDistance 小于中间线，
+                            //即view在中间线的左边或者上边
+                            targetPosition = position1;
+                        } else {
+                            targetPosition = position2;
+                        }
+                    }
                 }
                 break;
             }
             default:
-                //其他情况基本上不会出现
                 break;
         }
-        Log.d(TAG, "findTargetSnapPosition->forwardDirection:" + forwardDirection + ",targetPosition:" + targetPosition + ",scrollDistance:" + scrollDistance);
-
+//        switch (snapList.size()) {
+//            case 1: {
+//                //数量为1：锚点view肯定是完全显示的，而且view新绘制进来的
+//                View view = snapList.get(0);
+//                int distance = distanceToCenter(manager, view);
+//
+//                if (forwardDirection ? distance >= 0 : distance <= 0) {
+//                    int position = manager.getPosition(view);
+//                    //寻找上一个锚点位置
+//                    targetPosition = position - manager.getOnePageSize();
+//                    if (targetPosition < 0) {
+//                        targetPosition = RecyclerView.NO_POSITION;
+//                    }
+//                } else {
+//                    targetPosition = manager.getPosition(view);
+//                }
+//                break;
+//            }
+//            case 2: {
+//                //数量为2：锚点view肯定不是完全显示的
+//                View view1 = snapList.get(0);
+//                int distance1 = distanceToCenter(manager, view1);
+//                View view2 = snapList.get(1);
+//                int distance2 = distanceToCenter(manager, view2);
+//
+//                //distance1肯定是小于layoutCenter
+//                //distance2可能是小于、等于、大于layoutCenter
+//                targetPosition = manager.getPosition(view1);
+//                if (forwardDirection) {
+//                    //判断谁离中心位置距离最近且view2的中心线在layoutCenter的前面
+//                    if (manager.getOnePageSize() == 1) {
+//                        //这种情况比较特殊，1行x1列的情况
+//                        if (Math.abs(distance1) > Math.abs(distance2)) {
+//                            targetPosition = manager.getPosition(view2);
+//                        }
+//                    }
+//                } else {
+//
+//                    targetPosition = Math.abs(distance2) <= Math.abs(distance1) && distance2 < 0 ?
+//                            manager.getPosition(view2) : manager.getPosition(view1);
+//                }
+//                break;
+//            }
+//            default:
+//                //其他情况基本上不会出现
+//                break;
+//        }
+        Log.d(TAG, "findTargetSnapPosition->forwardDirection:" + forwardDirection + ",targetPosition:" + targetPosition + ",scrollDistance:" + scrollDistance + ",snapList:" + snapList.size());
+        snapList.clear();
         return targetPosition;
     }
 
@@ -171,10 +259,13 @@ public class PagerGridSnapHelper extends SnapHelper {
      */
     private int distanceToCenter(RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
         //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
-        final int layoutCenter = getLayoutStartAfterPadding(layoutManager) + getLayoutTotalSpace(layoutManager) / 2;
-        final int childCenter = getViewDecoratedStart(layoutManager, targetView)
-                + (getViewDecoratedMeasurement(layoutManager, targetView) / 2);
+        final int layoutCenter = getLayoutCenter(layoutManager);
+        final int childCenter = getChildViewCenter(layoutManager, targetView);
         return childCenter - layoutCenter;
+    }
+
+    private int getLayoutCenter(RecyclerView.LayoutManager layoutManager) {
+        return getLayoutStartAfterPadding(layoutManager) + getLayoutTotalSpace(layoutManager) / 2;
     }
 
     private int getLayoutStartAfterPadding(RecyclerView.LayoutManager layoutManager) {
@@ -187,6 +278,10 @@ public class PagerGridSnapHelper extends SnapHelper {
                 layoutManager.getHeight() - layoutManager.getPaddingTop() - layoutManager.getPaddingBottom();
     }
 
+    private int getChildViewCenter(RecyclerView.LayoutManager layoutManager, View targetView) {
+        return getViewDecoratedStart(layoutManager, targetView)
+                + (getViewDecoratedMeasurement(layoutManager, targetView) / 2);
+    }
 
     private int getViewDecoratedStart(RecyclerView.LayoutManager layoutManager, View view) {
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
@@ -194,6 +289,15 @@ public class PagerGridSnapHelper extends SnapHelper {
             return layoutManager.getDecoratedLeft(view) - params.leftMargin;
         } else {
             return layoutManager.getDecoratedTop(view) - params.topMargin;
+        }
+    }
+
+    private int getViewDecoratedEnd(RecyclerView.LayoutManager layoutManager, View view) {
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
+        if (layoutManager.canScrollHorizontally()) {
+            return layoutManager.getDecoratedRight(view) - params.rightMargin;
+        } else {
+            return layoutManager.getDecoratedBottom(view) - params.bottomMargin;
         }
     }
 

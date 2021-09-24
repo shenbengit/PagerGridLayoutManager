@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
@@ -372,8 +373,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     @Override
     public void onScrollStateChanged(int state) {
-        Log.i("PagerGridSnapHelper", "onScrollStateChanged: "+state);
-        switch (state){
+        Log.i("PagerGridSnapHelper", "onScrollStateChanged: " + state);
+        switch (state) {
             case RecyclerView.SCROLL_STATE_IDLE://静止状态
 
                 break;
@@ -387,16 +388,17 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     @Override
-    public boolean canScrollHorizontally() {
+    public final boolean canScrollHorizontally() {
         return mOrientation == RecyclerView.HORIZONTAL;
     }
 
     @Override
-    public boolean canScrollVertically() {
+    public final boolean canScrollVertically() {
         return mOrientation == RecyclerView.VERTICAL;
     }
 
     @Override
+    @CallSuper
     public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
         super.onDetachedFromWindow(view, recycler);
         mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
@@ -409,7 +411,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      *
      * @return
      */
-    public int getOnePageSize() {
+    public final int getOnePageSize() {
         return mOnePageSize;
     }
 
@@ -425,7 +427,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     @IntRange(from = 1)
-    public int getColumns() {
+    public final int getColumns() {
         return mColumns;
     }
 
@@ -441,7 +443,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     @IntRange(from = 1)
-    public int getRows() {
+    public final int getRows() {
         return mRows;
     }
 
@@ -467,7 +469,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * @param position position
      * @return 获取当前position所在页下标
      */
-    public int getPagerIndexByPosition(int position) {
+    public final int getPagerIndexByPosition(int position) {
         return position / mOnePageSize;
     }
 
