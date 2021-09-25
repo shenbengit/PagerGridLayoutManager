@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 outRect.set(5, 5, 5, 5);
             }
         });
-        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(3, 3, PagerGridLayoutManager.HORIZONTAL);
+        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(1, 3, PagerGridLayoutManager.HORIZONTAL);
 //        LinearLayoutManager layoutManager = new LinearLayoutManager(this,RecyclerView.HORIZONTAL,false);
 //        GridLayoutManager layoutManager =new GridLayoutManager(this,4);
         rv.setLayoutManager(layoutManager);

@@ -18,8 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
 
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 
@@ -106,9 +104,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
 
-    private final Rect mSnapRect = new Rect();
-    private final Rect mLayoutToStartSnapRect = new Rect();
-
+    private final Rect mStartSnapRect = new Rect();
+    private final Rect mEndSnapRect = new Rect();
 
     private RecyclerView mRecyclerView;
 
@@ -271,7 +268,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         top = bottom - mItemHeight;
         left = right - mItemWidth;
         mLayoutState.setOffsetRect(left, top, right, bottom);
-        mSnapRect.set(getPaddingStart(), getPaddingTop(), getPaddingStart() + mItemWidth, getPaddingTop() + mItemHeight);
+
+        mStartSnapRect.set(getPaddingStart(), getPaddingTop(), getPaddingStart() + mItemWidth, getPaddingTop() + mItemHeight);
+        mEndSnapRect.set(getPaddingEnd() - mItemWidth, getPaddingTop(), getPaddingEnd(), getPaddingTop() + mItemHeight);
 
         //回收views
         detachAndScrapAttachedViews(recycler);
@@ -821,91 +820,19 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return mOrientation == HORIZONTAL ? getPaddingLeft() : getPaddingTop();
     }
 
-    int getEnd() {
+    private int getEnd() {
         return mOrientation == HORIZONTAL ? getRealWidth() : getRealHeight();
     }
 
     /**
      * @return
      */
-    Rect getSnapRect() {
-        return mSnapRect;
+    final Rect getStartSnapRect() {
+        return mStartSnapRect;
     }
 
-    /**
-     * 寻找需要对齐的view
-     *
-     * @return
-     */
-    @Nullable
-    View findSnapView() {
-        ensureLayoutState();
-//        if (null != getFocusedChild()) {
-//            return getFocusedChild();
-//        }
-        int count = getChildCount();
-        if (count == 0) {
-            return null;
-        }
-        int delta = mLayoutState.mLastScrollDelta;
-        //是否是向尾部布局
-        boolean layoutToEnd = delta >= 0;
-        //目标位置
-        int targetPosition = RecyclerView.NO_POSITION;
-        View childView = null;
-//        List<View> snapList = new ArrayList<>();
-//        for (int i = 0; i < count; i++) {
-//            View child = getChildAt(i);
-//            if (child == null) {
-//                continue;
-//            }
-//            if (getPosition(child) % mOnePageSize == 0) {
-//                snapList.add(child);
-//                break;
-//            }
-//        }
-//        if (snapList.isEmpty()) {
-//            return null;
-//        }
-//        if (snapList.size() == 1) {
-//            return snapList.get(0);
-//        }
-//        if (layoutToEnd) {
-//
-//        } else {
-//
-//        }
-        if (layoutToEnd) {
-            //向尾部布局
-            for (int i = count - 1; i >= 0; i--) {
-                childView = getChildAt(i);
-                if (childView == null) {
-                    continue;
-                }
-                if (getPosition(childView) % mOnePageSize == 0) {
-                    targetPosition = i;
-                    break;
-                }
-            }
-        } else {
-            //向头部布局
-            for (int i = 0; i < count; i++) {
-                childView = getChildAt(i);
-                if (childView == null) {
-                    continue;
-                }
-                if (getPosition(childView) % mOnePageSize == mOnePageSize - 1) {
-                    targetPosition = i;
-                    break;
-                }
-            }
-        }
-        Log.i("PagerGridSnapHelper", "findSnapView-targetPosition: " + targetPosition + ",layoutToEnd: " + layoutToEnd);
-        return childView;
-    }
-
-    int getMinFlingVelocity() {
-        return getEnd();
+    final Rect getEndSnapRect() {
+        return mEndSnapRect;
     }
 
     /**

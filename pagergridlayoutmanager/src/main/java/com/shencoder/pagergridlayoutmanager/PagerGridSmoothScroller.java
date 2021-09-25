@@ -1,6 +1,5 @@
 package com.shencoder.pagergridlayoutmanager;
 
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -19,8 +18,8 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
     private static final String TAG = "PagerGridSmoothScroller";
 
     private final RecyclerView mRecyclerView;
-    private static final float MILLISECONDS_PER_INCH = 200f;
-    private static final int MAX_SCROLL_ON_FLING_DURATION = 500; //ms
+    private static final float MILLISECONDS_PER_INCH = 100f;
+    private static final int MAX_SCROLL_ON_FLING_DURATION = 300; //ms
 
     public PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
         super(recyclerView.getContext());
@@ -40,22 +39,22 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
         if (layoutManager instanceof PagerGridLayoutManager) {
             PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
             int targetPosition = manager.getPosition(targetView);
-            Rect snapRect = manager.getSnapRect();
+            Rect snapRect = manager.getStartSnapRect();
             Rect targetRect = new Rect();
             layoutManager.getDecoratedBoundsWithMargins(targetView, targetRect);
             int dx = calculateDx(manager, snapRect, targetRect);
             int dy = calculateDy(manager, snapRect, targetRect);
-//            final int time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));
+            final int time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));
 //            if (time > 0) {
 //                Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
 //
 //                action.update(dx, dy, time, mDecelerateInterpolator);
 //            }
-            final int distance = (int) Math.sqrt(dx * dx + dy * dy);
-            final int time = calculateTimeForDeceleration(distance);
+//            final int distance = (int) Math.sqrt(dx * dx + dy * dy);
+//            final int time = calculateTimeForDeceleration(distance);
             if (time > 0) {
                 Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
-                action.update(dx, dy, time, mLinearInterpolator);
+                action.update(dx, dy, time, mDecelerateInterpolator);
             }
         } else {
             super.onTargetFound(targetView, state, action);
@@ -72,32 +71,18 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
         return Math.min(MAX_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
     }
 
-    private int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
+    public static int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
         if (!manager.canScrollHorizontally()) {
             return 0;
         }
-        int snapPreference = getHorizontalSnapPreference();
-        switch (snapPreference) {
-            case SNAP_TO_START:
-            case SNAP_TO_END:
-                return targetRect.left - snapRect.left;
-            default:
-                return 0;
-        }
+        return targetRect.left - snapRect.left;
     }
 
-    private int calculateDy(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
+    public static int calculateDy(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
         if (!manager.canScrollVertically()) {
             return 0;
         }
-        int snapPreference = getVerticalSnapPreference();
-        switch (snapPreference) {
-            case SNAP_TO_START:
-            case SNAP_TO_END:
-                return targetRect.top - snapRect.top;
-            default:
-                return 0;
-        }
+        return targetRect.top - snapRect.top;
     }
 
 }
