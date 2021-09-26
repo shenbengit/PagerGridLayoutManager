@@ -122,7 +122,6 @@ public class PagerGridSnapHelper extends SnapHelper {
             }
             case 2: {
                 View view1 = snapList.get(0);
-                int viewDecoratedStart1 = getViewDecoratedStart(manager, view1);
                 int position1 = manager.getPosition(view1);
                 View view2 = snapList.get(1);
                 int viewDecoratedStart2 = getViewDecoratedStart(manager, view2);
@@ -175,29 +174,22 @@ public class PagerGridSnapHelper extends SnapHelper {
             reacquireSnapList(manager);
             switch (snapList.size()) {
                 case 1: {
-                    View view = snapList.get(0);
-                    int decoratedStart = getViewDecoratedStart(manager, view);
-//                    if (manager.getStartSnapRect().left != decoratedStart) {
-                        snapView = snapList.get(0);
-//                    }
+                    snapView = snapList.get(0);
                     break;
                 }
                 case 2: {
                     //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
                     final int layoutCenter = getLayoutCenter(manager);
                     View view1 = snapList.get(0);
-                    int distance1 = distanceToCenter(manager, view1);
-                    int position1 = manager.getPosition(view1);
-                    int decoratedStart1 = getViewDecoratedStart(manager, view1);
-                    View view2 = snapList.get(1);
-                    int distance2 = distanceToCenter(manager, view2);
-                    int position2 = manager.getPosition(view2);
-                    int decoratedStart2 = getViewDecoratedStart(manager, view2);
 
-                    if (Math.abs(layoutCenter - distance1) <= Math.abs(layoutCenter - distance2)) {
-                        snapView = view1;
-                    } else {
+                    View view2 = snapList.get(1);
+                    Rect rect = new Rect();
+                    manager.getDecoratedBoundsWithMargins(view2, rect);
+                    int viewDecoratedStart2 = getViewDecoratedStart(manager, view2);
+                    if (viewDecoratedStart2 <= layoutCenter) {
                         snapView = view2;
+                    } else {
+                        snapView = view1;
                     }
                     break;
                 }
@@ -214,28 +206,36 @@ public class PagerGridSnapHelper extends SnapHelper {
     @Override
     public int[] calculateDistanceToFinalSnap(@NonNull RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
         int[] snapDistance = new int[2];
+        int targetPosition = layoutManager.getPosition(targetView);
         if (layoutManager instanceof PagerGridLayoutManager) {
             final PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
             //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
             final int layoutCenter = getLayoutCenter(manager);
             int viewDecoratedStart = getViewDecoratedStart(manager, targetView);
-            int dx = 0;
-            int dy = 0;
+            int dx;
+            int dy;
             Rect targetRect = new Rect();
             layoutManager.getDecoratedBoundsWithMargins(targetView, targetRect);
             if (viewDecoratedStart <= layoutCenter) {
+                Log.i(TAG, "calculateDistanceToFinalSnap: +++++++++++++++++++++");
                 Rect snapRect = manager.getStartSnapRect();
 
                 dx = PagerGridSmoothScroller.calculateDx(manager, snapRect, targetRect);
                 dy = PagerGridSmoothScroller.calculateDy(manager, snapRect, targetRect);
             } else {
+                Log.i(TAG, "calculateDistanceToFinalSnap: ---------------------");
                 dx = -calculateDxToNextPager(manager, targetRect);
                 dy = -calculateDyToNextPager(manager, targetRect);
             }
             snapDistance[0] = dx;
             snapDistance[1] = dy;
+
+            if (snapDistance[0] == 0 && snapDistance[1] == 0) {
+                //说明滑动完成，计算页标
+                manager.calculateCurrentPagerIndexByPosition(targetPosition);
+            }
         }
-        Log.i(TAG, "calculateDistanceToFinalSnap-targetView: " + layoutManager.getPosition(targetView) + ",snapDistance: " + Arrays.toString(snapDistance));
+        Log.i(TAG, "calculateDistanceToFinalSnap-targetView: " + targetPosition + ",snapDistance: " + Arrays.toString(snapDistance));
         return snapDistance;
     }
 

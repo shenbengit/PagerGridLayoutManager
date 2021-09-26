@@ -68,6 +68,7 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
 
     @Override
     protected int calculateTimeForScrolling(int dx) {
+        Log.i(TAG, "calculateTimeForScrolling: " + dx);
         return Math.min(MAX_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
     }
 
