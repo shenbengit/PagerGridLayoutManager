@@ -30,7 +30,10 @@ import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
  */
 public class PagerGridLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider {
     private static final String TAG = "PagerGridLayoutManager";
-    private static final boolean DEBUG = true;
+    /**
+     * 是否启用Debug
+     */
+    public static final boolean DEBUG = true;
     /**
      * 水平滑动
      */
@@ -94,23 +97,24 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     private int mItemHeightUsed;
 
     /**
-     * 当前页左上角锚点位置
-     */
-    private int mCurrentPagerAnchorPosition;
-    /**
      * 用于保存一些状态
      */
-    private LayoutState mLayoutState;
+    private LayoutState mLayoutState = new LayoutState();
 
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
-
+    /**
+     * 用于计算锚点坐标-左上角第一个view的位置
+     */
     private final Rect mStartSnapRect = new Rect();
+    /**
+     * 用于计算锚点坐标-右下角最后一个view的位置
+     */
     private final Rect mEndSnapRect = new Rect();
 
     private RecyclerView mRecyclerView;
 
     @Nullable
-    private PagerChangeListener mPagerChangeListener;
+    private PagerChangedListener mPagerChangedListener;
 
     private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
         @Override
@@ -178,6 +182,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     @Override
+    public boolean isAutoMeasureEnabled() {
+        return true;
+    }
+
+    @Override
     public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state, int widthSpec, int heightSpec) {
         int widthMode = View.MeasureSpec.getMode(widthSpec);
         int heightMode = View.MeasureSpec.getMode(heightSpec);
@@ -185,7 +194,34 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (widthMode != View.MeasureSpec.EXACTLY || heightMode != View.MeasureSpec.EXACTLY) {
             throw new IllegalStateException("RecyclerView's width and height must be exactly");
         }
-        super.onMeasure(recycler, state, widthSpec, heightSpec);
+        int widthSize = View.MeasureSpec.getSize(widthSpec);
+        int heightSize = View.MeasureSpec.getSize(heightSpec);
+
+        int realWidth = widthSize - getPaddingStart() - getPaddingEnd();
+        int realHeight = heightSize - getPaddingTop() - getPaddingBottom();
+        //均分宽
+        mItemWidth = mColumns > 0 ? realWidth / mColumns : 0;
+        //均分高
+        mItemHeight = mRows > 0 ? realHeight / mRows : 0;
+
+        mItemWidthUsed = realWidth - mItemWidth;
+        mItemHeightUsed = realHeight - mItemHeight;
+
+        int diffWidth = widthSize - mItemWidth * mColumns;
+        int diffHeight = heightSize - mItemHeight * mRows;
+
+        if (DEBUG) {
+            Log.d(TAG, "onMeasure- originalWidthSize: " + widthSize + ",originalHeightSize: " + heightSize + ",diffWidth: " + diffWidth + ",diffHeight: " + diffHeight + ",mItemWidth: " + mItemWidth + ",mItemHeight: " + mItemHeight);
+        }
+
+        //重置下宽高，因为在均分的时候，存在除不尽的情况，要减去多出来的这部分大小，一般也就为几px
+        //不减去的话，会导致翻页计算不触发
+        super.onMeasure(
+                recycler,
+                state,
+                View.MeasureSpec.makeMeasureSpec(widthSize - diffWidth, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(heightSize - diffHeight, View.MeasureSpec.EXACTLY)
+        );
     }
 
     @Override
@@ -204,12 +240,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         mOnePageSize = mRows * mColumns;
-        //均分宽
-        mItemWidth = mColumns > 0 ? getRealWidth() / mColumns : 0;
-        //均分高
-        mItemHeight = mRows > 0 ? getRealHeight() / mRows : 0;
-        mItemWidthUsed = getRealWidth() - mItemWidth;
-        mItemHeightUsed = getRealHeight() - mItemHeight;
 
         //计算总页数
         int pagerCount = itemCount / mOnePageSize;
@@ -217,9 +247,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             ++pagerCount;
         }
         if (DEBUG) {
-            Log.i(TAG, "onLayoutChildren: getRealWidth:" + getRealWidth() + ",getRealHeight:" + getRealHeight() + ",mItemWidth:" + mItemWidth + ",mItemHeight:" + mItemHeight + ",pagerCount:" + pagerCount);
+            Log.i(TAG, "pagerCount:" + pagerCount);
         }
-        ensureLayoutState();
+
         //计算需要补充空间
         mLayoutState.replenishDelta = 0;
         if (pagerCount > 1) {
@@ -245,7 +275,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             }
             mLayoutState.replenishDelta = replenish;
         }
-        int pagerIndex = mLayoutState.mCurrentPagerIndex;
+        int pagerIndex = mCurrentPagerIndex;
         if (pagerIndex == NO_ITEM) {
             pagerIndex = 0;
         }
@@ -255,7 +285,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             pagerIndex = maxPagerIndex;
         }
 
-        mCurrentPagerAnchorPosition = pagerIndex * mOnePageSize;
         mLayoutState.mCurrentPosition = pagerIndex * mOnePageSize;
 
         mLayoutState.mRecycle = false;
@@ -280,7 +309,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mLayoutState.setOffsetRect(left, top, right, bottom);
 
         mStartSnapRect.set(getPaddingStart(), getPaddingTop(), getPaddingStart() + mItemWidth, getPaddingTop() + mItemHeight);
-        mEndSnapRect.set(getPaddingEnd() - mItemWidth, getPaddingTop(), getPaddingEnd(), getPaddingTop() + mItemHeight);
+        mEndSnapRect.set(getWidth() - getPaddingEnd() - mItemWidth, getHeight() - getPaddingBottom() - mItemHeight, getWidth() - getPaddingEnd(), getHeight() - getPaddingBottom());
 
         //回收views
         detachAndScrapAttachedViews(recycler);
@@ -289,7 +318,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (DEBUG) {
             Log.i(TAG, "onLayoutChildren: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size() + ",mLayoutState.replenishDelta:" + mLayoutState.replenishDelta);
         }
-
         setPagerCount(pagerCount);
         setCurrentPagerIndex(pagerIndex);
     }
@@ -388,11 +416,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper.attachToRecyclerView(null);
         mRecyclerView = null;
-        mPagerChangeListener = null;
+        mPagerChangedListener = null;
     }
 
-    public void setPagerChangeListener(@Nullable PagerChangeListener listener) {
-        mPagerChangeListener = listener;
+    public void setPagerChangedListener(@Nullable PagerChangedListener listener) {
+        mPagerChangedListener = listener;
     }
 
     /**
@@ -411,6 +439,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (mColumns == columns) {
             return;
         }
+        mPagerCount = NO_ITEM;
+        mCurrentPagerIndex = NO_ITEM;
         mColumns = columns;
         requestLayout();
     }
@@ -431,6 +461,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         mRows = rows;
+        mPagerCount = NO_ITEM;
+        mCurrentPagerIndex = NO_ITEM;
         requestLayout();
     }
 
@@ -456,6 +488,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
         if (orientation != mOrientation) {
             mOrientation = orientation;
+            mPagerCount = NO_ITEM;
+            mCurrentPagerIndex = NO_ITEM;
+
             requestLayout();
         }
     }
@@ -510,6 +545,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             //同一页直接return
             return;
         }
+        boolean isLayoutToEnd = pagerIndex > previousIndex;
 
         if (Math.abs(pagerIndex - previousIndex) > 3) {
             //先就近直接跳转
@@ -517,11 +553,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             scrollToPagerIndex(transitionIndex);
 
             if (mRecyclerView != null) {
-                mRecyclerView.post(new SmoothScrollToPosition(pagerIndex * mOnePageSize, this, mRecyclerView));
+                mRecyclerView.post(new SmoothScrollToPosition(getPositionByPagerIndex(pagerIndex, isLayoutToEnd), this, mRecyclerView));
             }
         } else {
             PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
-            smoothScroller.setTargetPosition(pagerIndex * mOnePageSize);
+            smoothScroller.setTargetPosition(getPositionByPagerIndex(pagerIndex, isLayoutToEnd));
             startSmoothScroll(smoothScroller);
         }
     }
@@ -556,8 +592,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         mPagerCount = pagerCount;
-        if (mPagerChangeListener != null) {
-            mPagerChangeListener.onPagerSizeChanged(pagerCount);
+        if (mPagerChangedListener != null) {
+            mPagerChangedListener.onPagerCountChanged(pagerCount);
         }
     }
 
@@ -580,11 +616,10 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (mCurrentPagerIndex == pagerIndex) {
             return;
         }
+        int prePagerIndex = mCurrentPagerIndex;
         mCurrentPagerIndex = pagerIndex;
-        ensureLayoutState();
-        mLayoutState.mCurrentPagerIndex = pagerIndex;
-        if (mPagerChangeListener != null) {
-            mPagerChangeListener.onPagerIndexSelected(pagerIndex);
+        if (mPagerChangedListener != null) {
+            mPagerChangedListener.onPagerIndexSelected(prePagerIndex, pagerIndex);
         }
     }
 
@@ -592,10 +627,22 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * 获取当前的页码
      *
      * @return -1：{@link #getItemCount()} is 0
+     * @since {{@link #NO_ITEM}}
      */
     @IntRange(from = -1)
     public final int getCurrentPagerIndex() {
         return mCurrentPagerIndex;
+    }
+
+    /**
+     * 根据页码下标获取position
+     *
+     * @param pagerIndex    页码
+     * @param isLayoutToEnd true:页的第一个位置，false:页的最后一个位置
+     * @return
+     */
+    private int getPositionByPagerIndex(int pagerIndex, boolean isLayoutToEnd) {
+        return isLayoutToEnd ? pagerIndex * mOnePageSize : pagerIndex * mOnePageSize + mOnePageSize - 1;
     }
 
     /**
@@ -621,16 +668,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      */
     private int getRealHeight() {
         return getHeight() - getPaddingTop() - getPaddingBottom();
-    }
-
-    private void ensureLayoutState() {
-        if (mLayoutState == null) {
-            mLayoutState = createLayoutState();
-        }
-    }
-
-    private LayoutState createLayoutState() {
-        return new LayoutState();
     }
 
     /**
@@ -770,7 +807,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (getChildCount() == 0 || delta == 0 || mPagerCount == 1) {
             return 0;
         }
-        ensureLayoutState();
         mLayoutState.mRecycle = true;
         final int layoutDirection = delta > 0 ? LayoutState.LAYOUT_END : LayoutState.LAYOUT_START;
         mLayoutState.mLayoutDirection = layoutDirection;
@@ -848,12 +884,13 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     private void recycleViewsFromStart(RecyclerView.Recycler recycler) {
+        int start = getPaddingStart();
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = getChildAt(i);
             if (childAt != null) {
                 int decorated = getDecoratedEnd(childAt);
-                if (decorated > 0) {
+                if (decorated > start) {
                     continue;
                 }
                 removeAndRecycleView(childAt, recycler);
@@ -862,7 +899,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     private void recycleViewsFromEnd(RecyclerView.Recycler recycler) {
-        int end = mOrientation == HORIZONTAL ? getWidth() : getHeight();
+        int end = getEndAfterPadding();
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = getChildAt(i);
@@ -935,12 +972,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     /**
-     * @return
+     * @return 左上角第一个view的位置
      */
     final Rect getStartSnapRect() {
         return mStartSnapRect;
     }
 
+    /**
+     * @return 右下角最后一个view的位置
+     */
     final Rect getEndSnapRect() {
         return mEndSnapRect;
     }
@@ -954,17 +994,32 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         setCurrentPagerIndex(getPagerIndexByPosition(position));
     }
 
+    final LayoutState getLayoutState() {
+        return mLayoutState;
+    }
+
     @Nullable
     @Override
     public PointF computeScrollVectorForPosition(int targetPosition) {
-        if (getChildCount() == 0) {
+        int childCount = getChildCount();
+        if (childCount == 0) {
             return null;
         }
-        final int firstChildPos = getPosition(getChildAt(0));
-//        if (firstChildPos == targetPosition) {
-//            return null;
-//        }
-        final float direction = targetPosition < firstChildPos ? -1f : 1f;
+        int firstSnapPosition = RecyclerView.NO_POSITION;
+        for (int i = childCount - 1; i >= 0; i--) {
+            View childAt = getChildAt(i);
+            if (childAt != null) {
+                int position = getPosition(childAt);
+                if (position % getOnePageSize() == 0) {
+                    firstSnapPosition = position;
+                    break;
+                }
+            }
+        }
+        if (firstSnapPosition == RecyclerView.NO_POSITION) {
+            return null;
+        }
+        float direction = targetPosition < firstSnapPosition ? -1f : 1f;
         if (mOrientation == HORIZONTAL) {
             return new PointF(direction, 0f);
         } else {
@@ -1042,8 +1097,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         protected boolean mRecycle;
 
         protected int mCurrentPosition;
-
-        protected int mCurrentPagerIndex = NO_ITEM;
         /**
          * 遍历Adapter数据的方向
          * 值为 {@link #LAYOUT_START} or {@link #LAYOUT_END}
@@ -1108,19 +1161,20 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
     }
 
-    public interface PagerChangeListener {
+    public interface PagerChangedListener {
         /**
          * 页面总数量变化
          *
-         * @param pageSize 页面总数
+         * @param pagerCount 页面总数
          */
-        void onPagerSizeChanged(int pageSize);
+        void onPagerCountChanged(@IntRange(from = 0) int pagerCount);
 
         /**
-         * 页面被选中
+         * 选中的页面下标
          *
-         * @param pageIndex 选中的页面下标
+         * @param prePagerIndex     上次的页码，当{{@link #getItemCount()}}为0时，为-1，{{@link #NO_ITEM}}
+         * @param currentPagerIndex 当前的页码，当{{@link #getItemCount()}}为0时，为-1，{{@link #NO_ITEM}}
          */
-        void onPagerIndexSelected(int pageIndex);
+        void onPagerIndexSelected(@IntRange(from = -1) int prePagerIndex, @IntRange(from = -1) int currentPagerIndex);
     }
 }

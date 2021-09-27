@@ -1,5 +1,6 @@
 package com.shencoder.pagergridlayoutmanager;
 
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,14 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
  * @date 2021/02/18 11:40
  * @email 714081644@qq.com
  */
-public class PagerGridSmoothScroller extends LinearSmoothScroller {
+class PagerGridSmoothScroller extends LinearSmoothScroller {
     private static final String TAG = "PagerGridSmoothScroller";
 
     private final RecyclerView mRecyclerView;
     private static final float MILLISECONDS_PER_INCH = 100f;
-    private static final int MAX_SCROLL_ON_FLING_DURATION = 300; //ms
+    private static final int MAX_SCROLL_ON_FLING_DURATION = 100; //ms
 
-    public PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
+    PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
         super(recyclerView.getContext());
         mRecyclerView = recyclerView;
     }
@@ -38,26 +39,33 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
         RecyclerView.LayoutManager layoutManager = getLayoutManager();
         if (layoutManager instanceof PagerGridLayoutManager) {
             PagerGridLayoutManager manager = (PagerGridLayoutManager) layoutManager;
+
             int targetPosition = manager.getPosition(targetView);
-            Rect snapRect = manager.getStartSnapRect();
+
+            PointF pointF = computeScrollVectorForPosition(targetPosition);
+            if (pointF == null) {
+                //为null，则不处理
+                return;
+            }
+
+            boolean isLayoutToEnd = pointF.x > 0 || pointF.y > 0;
+            Rect snapRect;
+            if (isLayoutToEnd) {
+                snapRect = manager.getStartSnapRect();
+            } else {
+                snapRect = manager.getEndSnapRect();
+            }
             Rect targetRect = new Rect();
             layoutManager.getDecoratedBoundsWithMargins(targetView, targetRect);
-            int dx = calculateDx(manager, snapRect, targetRect);
-            int dy = calculateDy(manager, snapRect, targetRect);
+            int dx = calculateDx(manager, snapRect, targetRect, isLayoutToEnd);
+            int dy = calculateDy(manager, snapRect, targetRect, isLayoutToEnd);
             final int time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));
-//            if (time > 0) {
-//                Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
-//
-//                action.update(dx, dy, time, mDecelerateInterpolator);
-//            }
-//            final int distance = (int) Math.sqrt(dx * dx + dy * dy);
-//            final int time = calculateTimeForDeceleration(distance);
-            if (time > 0) {
+            if (PagerGridLayoutManager.DEBUG) {
                 Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
+            }
+            if (time > 0) {
                 action.update(dx, dy, time, mDecelerateInterpolator);
             }
-        } else {
-            super.onTargetFound(targetView, state, action);
         }
     }
 
@@ -68,7 +76,6 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
 
     @Override
     protected int calculateTimeForScrolling(int dx) {
-        Log.i(TAG, "calculateTimeForScrolling: " + dx);
         return Math.min(MAX_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
     }
 
@@ -86,4 +93,17 @@ public class PagerGridSmoothScroller extends LinearSmoothScroller {
         return targetRect.top - snapRect.top;
     }
 
+    public static int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect, boolean isLayoutToEnd) {
+        if (!manager.canScrollHorizontally()) {
+            return 0;
+        }
+        return isLayoutToEnd ? (targetRect.left - snapRect.left) : (targetRect.right - snapRect.right);
+    }
+
+    public static int calculateDy(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect, boolean isLayoutToEnd) {
+        if (!manager.canScrollVertically()) {
+            return 0;
+        }
+        return isLayoutToEnd ? (targetRect.top - snapRect.top) : (targetRect.bottom - snapRect.bottom);
+    }
 }
