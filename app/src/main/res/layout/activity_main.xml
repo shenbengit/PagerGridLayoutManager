@@ -7,11 +7,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content"
+        android:background="#2196F3"
+        app:tabIndicatorColor="#FF5722" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp"
@@ -19,11 +20,4 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/btnMove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:background="@color/colorAccent"
-        android:text="移动" />
 </LinearLayout>

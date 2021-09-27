@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -133,6 +134,38 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
     };
 
+    private final RecyclerView.OnItemTouchListener onItemTouchListener = new RecyclerView.OnItemTouchListener() {
+        private int mLastTouchX;
+        private int mLastTouchY;
+
+        @Override
+        public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+            int action = e.getAction();
+//            switch (action) {
+//                case MotionEvent.ACTION_DOWN:
+//                    rv.getParent().requestDisallowInterceptTouchEvent(true);
+//                    break;
+//                case MotionEvent.ACTION_UP:
+//                    rv.getParent().requestDisallowInterceptTouchEvent(false);
+//
+//                    break;
+//                case MotionEvent.ACTION_MOVE:
+//                    break;
+//            }
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+
+        }
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+        }
+    };
+
     public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns) {
         this(rows, columns, HORIZONTAL);
     }
@@ -175,10 +208,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         super.onAttachedToWindow(view);
-        mRecyclerView = view;
-        mRecyclerView.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
+        view.addOnItemTouchListener(onItemTouchListener);
+        view.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
+        mRecyclerView = view;
     }
 
     @Override
@@ -345,6 +379,38 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 //        return super.findViewByPosition(position);
 //    }
 
+
+    @Override
+    public int computeHorizontalScrollRange(@NonNull RecyclerView.State state) {
+        return super.computeHorizontalScrollRange(state);
+    }
+
+    @Override
+    public int computeHorizontalScrollExtent(@NonNull RecyclerView.State state) {
+        return super.computeHorizontalScrollExtent(state);
+    }
+
+    @Override
+    public int computeHorizontalScrollOffset(@NonNull RecyclerView.State state) {
+        return super.computeHorizontalScrollOffset(state);
+    }
+
+
+    @Override
+    public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
+        return super.computeVerticalScrollRange(state);
+    }
+
+    @Override
+    public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
+        return super.computeVerticalScrollExtent(state);
+    }
+
+    @Override
+    public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
+        return super.computeVerticalScrollOffset(state);
+    }
+
     @Override
     public void scrollToPosition(int position) {
         if (!isIdle()) {
@@ -413,7 +479,10 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @CallSuper
     public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
         super.onDetachedFromWindow(view, recycler);
-        mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
+        if (mRecyclerView != null) {
+            mRecyclerView.removeOnItemTouchListener(onItemTouchListener);
+            mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
+        }
         mPagerGridSnapHelper.attachToRecyclerView(null);
         mRecyclerView = null;
         mPagerChangedListener = null;
