@@ -116,8 +116,8 @@ class PagerGridSnapHelper extends SnapHelper {
                         }
                     }
                 }
-                break;
             }
+            break;
             case 2: {
                 View view1 = snapList.get(0);
                 int position1 = manager.getPosition(view1);
@@ -151,8 +151,8 @@ class PagerGridSnapHelper extends SnapHelper {
                         }
                     }
                 }
-                break;
             }
+            break;
             case 3:
                 //1行*1列可能出现的情况
                 targetPosition = manager.getPosition(snapList.get(1));
@@ -178,8 +178,8 @@ class PagerGridSnapHelper extends SnapHelper {
             switch (snapList.size()) {
                 case 1: {
                     snapView = snapList.get(0);
-                    break;
                 }
+                break;
                 case 2: {
                     //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
                     final int layoutCenter = getLayoutCenter(manager);
@@ -194,8 +194,8 @@ class PagerGridSnapHelper extends SnapHelper {
                     } else {
                         snapView = view1;
                     }
-                    break;
                 }
+                break;
                 case 3:
                     //1行*1列可能出现的情况
                     snapView = snapList.get(1);
