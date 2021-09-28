@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -42,30 +43,30 @@ public class TestFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         rv = view.findViewById(R.id.rv);
-//        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(2, 3);
-//        layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedListener() {
-//            @Override
-//            public void onPagerCountChanged(int pagerCount) {
-//                Log.w(TAG, "onPagerCountChanged: " + pagerCount);
-//            }
-//
-//            @Override
-//            public void onPagerIndexSelected(int prePagerIndex, int currentPagerIndex) {
-//                Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
-//            }
-//        });
-//        layoutManager.setPagerScrollStateListener(new PagerGridLayoutManager.PagerScrollStateListener() {
-//            @Override
-//            public void onScrollToStart() {
-//                Log.i(TAG, "onScrollToStart: ");
-//            }
-//
-//            @Override
-//            public void onScrollToEnd() {
-//                Log.i(TAG, "onScrollToEnd: ");
-//            }
-//        });
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3, LinearLayoutManager.HORIZONTAL, false);
+        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(3, 3,PagerGridLayoutManager.VERTICAL);
+        layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedListener() {
+            @Override
+            public void onPagerCountChanged(int pagerCount) {
+                Log.w(TAG, "onPagerCountChanged: " + pagerCount);
+            }
+
+            @Override
+            public void onPagerIndexSelected(int prePagerIndex, int currentPagerIndex) {
+                Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
+            }
+        });
+        layoutManager.setPagerScrollStateListener(new PagerGridLayoutManager.PagerScrollStateListener() {
+            @Override
+            public void onScrollToStart() {
+                Log.i(TAG, "onScrollToStart: ");
+            }
+
+            @Override
+            public void onScrollToEnd() {
+                Log.i(TAG, "onScrollToEnd: ");
+            }
+        });
+//        LinearLayoutManager layoutManager = new MyLinearLayoutManager(requireContext(),  LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
         rv.setAdapter(adapter);
@@ -75,7 +76,7 @@ public class TestFragment extends Fragment {
             Toast.makeText(requireContext(), "点击了位置：" + position, Toast.LENGTH_SHORT).show();
         });
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 100; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
