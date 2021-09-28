@@ -361,36 +361,68 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return super.findViewByPosition(position);
     }
 
-
-    @Override
-    public int computeHorizontalScrollRange(@NonNull RecyclerView.State state) {
-        return super.computeHorizontalScrollRange(state);
-    }
-
-    @Override
-    public int computeHorizontalScrollExtent(@NonNull RecyclerView.State state) {
-        return super.computeHorizontalScrollExtent(state);
-    }
-
     @Override
     public int computeHorizontalScrollOffset(@NonNull RecyclerView.State state) {
-        return super.computeHorizontalScrollOffset(state);
-    }
-
-
-    @Override
-    public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
-        return super.computeVerticalScrollRange(state);
-    }
-
-    @Override
-    public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
-        return super.computeVerticalScrollExtent(state);
+        return computeScrollOffset(state);
     }
 
     @Override
     public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
-        return super.computeVerticalScrollOffset(state);
+        return computeScrollOffset(state);
+    }
+
+    @Override
+    public int computeHorizontalScrollExtent(@NonNull RecyclerView.State state) {
+        return computeScrollExtent(state);
+    }
+
+    @Override
+    public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
+        return computeScrollExtent(state);
+    }
+
+    @Override
+    public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
+        return computeScrollRange(state);
+    }
+
+    @Override
+    public int computeHorizontalScrollRange(@NonNull RecyclerView.State state) {
+        return computeScrollRange(state);
+    }
+
+    private int computeScrollOffset(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        //目前先这么算吧。。。后面再优化
+        int scrollOffset = Math.max(mCurrentPagerIndex, 0) * getEnd();
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollOffset: " + scrollOffset);
+        }
+        return scrollOffset;
+    }
+
+    private int computeScrollExtent(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        int scrollExtent = getEnd();
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollExtent: " + scrollExtent);
+        }
+        return scrollExtent;
+    }
+
+    private int computeScrollRange(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        int scrollRange = Math.max(mPagerCount, 0) * getEnd();
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollRange: " + scrollRange);
+        }
+        return scrollRange;
     }
 
     @Nullable
@@ -1304,8 +1336,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     /**
-     * @see RecyclerView#onSaveInstanceState()
-     * @see RecyclerView#onRestoreInstanceState(Parcelable)
+     * @see RecyclerView.LayoutManager#onSaveInstanceState()
+     * @see RecyclerView.LayoutManager#onRestoreInstanceState(Parcelable)
      */
     protected static class SavedState implements Parcelable {
         /**
