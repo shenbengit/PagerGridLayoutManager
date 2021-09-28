@@ -31,7 +31,9 @@ public class MainActivity extends AppCompatActivity {
         ViewPager2FragmentAdapter adapter = new ViewPager2FragmentAdapter(this);
         vp.setAdapter(adapter);
 
-        TabLayoutMediator mediator = new TabLayoutMediator(tabLayout, vp, (tab, position) -> tab.setText(adapter.getItem(position).getTitle()));
+        vp.setUserInputEnabled(false);
+
+        mediator = new TabLayoutMediator(tabLayout, vp, (tab, position) -> tab.setText(adapter.getItem(position).getTitle()));
         mediator.attach();
 
         List<MenuBean> list = new ArrayList<>();

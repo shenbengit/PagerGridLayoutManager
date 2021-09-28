@@ -161,10 +161,10 @@ class PagerGridSnapHelper extends SnapHelper {
                 Log.w(TAG, "findTargetSnapPosition-snapList.size: " + snapList.size());
                 break;
         }
-        snapList.clear();
         if (PagerGridLayoutManager.DEBUG) {
-            Log.d(TAG, "findTargetSnapPosition->forwardDirection:" + forwardDirection + ",targetPosition:" + targetPosition + ",scrollDistance:" + scrollDistance + ",snapList:" + snapList.size());
+            Log.d(TAG, "findTargetSnapPosition->forwardDirection:" + forwardDirection + ",targetPosition:" + targetPosition + ",velocityX: " + velocityX + ",velocityY: " + velocityY + ",scrollDistance:" + scrollDistance + ",snapList:" + snapList.size());
         }
+        snapList.clear();
         return targetPosition;
     }
 

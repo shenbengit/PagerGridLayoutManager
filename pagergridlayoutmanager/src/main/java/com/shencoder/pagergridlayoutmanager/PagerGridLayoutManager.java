@@ -3,11 +3,13 @@ package com.shencoder.pagergridlayoutmanager;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.IntDef;
@@ -100,7 +102,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 用于保存一些状态
      */
-    private LayoutState mLayoutState = new LayoutState();
+    private final LayoutState mLayoutState = new LayoutState();
 
     private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
     /**
@@ -116,6 +118,10 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     @Nullable
     private PagerChangedListener mPagerChangedListener;
+    private boolean isScrollToStart;
+    private boolean isScrollToEnd;
+    @Nullable
+    private PagerScrollStateListener mPagerScrollStateListener;
 
     private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
         @Override
@@ -134,37 +140,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
     };
 
-    private final RecyclerView.OnItemTouchListener onItemTouchListener = new RecyclerView.OnItemTouchListener() {
-        private int mLastTouchX;
-        private int mLastTouchY;
-
-        @Override
-        public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-            int action = e.getAction();
-//            switch (action) {
-//                case MotionEvent.ACTION_DOWN:
-//                    rv.getParent().requestDisallowInterceptTouchEvent(true);
-//                    break;
-//                case MotionEvent.ACTION_UP:
-//                    rv.getParent().requestDisallowInterceptTouchEvent(false);
-//
-//                    break;
-//                case MotionEvent.ACTION_MOVE:
-//                    break;
-//            }
-            return false;
-        }
-
-        @Override
-        public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-        }
-
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-        }
-    };
+    private RecyclerView.OnItemTouchListener onItemTouchListener;
 
     public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns) {
         this(rows, columns, HORIZONTAL);
@@ -208,7 +184,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         super.onAttachedToWindow(view);
-        view.addOnItemTouchListener(onItemTouchListener);
+        if (isInScrollingContainer(view)) {
+            //在一个可滑动的布局中，再添加监听
+            onItemTouchListener = new PagerGridItemTouchListener(this, view);
+            view.addOnItemTouchListener(onItemTouchListener);
+        }
         view.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
@@ -312,11 +292,12 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         int pagerIndex = mCurrentPagerIndex;
         if (pagerIndex == NO_ITEM) {
             pagerIndex = 0;
-        }
-        int maxPagerIndex = getMaxPagerIndex();
-        if (pagerIndex > maxPagerIndex) {
-            //如果之前的PagerIndex大于最大的PagerSize
-            pagerIndex = maxPagerIndex;
+        } else {
+            int maxPagerIndex = getMaxPagerIndex();
+            if (pagerIndex > maxPagerIndex) {
+                //如果之前的PagerIndex大于最大的PagerSize
+                pagerIndex = maxPagerIndex;
+            }
         }
 
         mLayoutState.mCurrentPosition = pagerIndex * mOnePageSize;
@@ -342,6 +323,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         left = right - mItemWidth;
         mLayoutState.setOffsetRect(left, top, right, bottom);
 
+        //计算锚点的坐标
         mStartSnapRect.set(getPaddingStart(), getPaddingTop(), getPaddingStart() + mItemWidth, getPaddingTop() + mItemHeight);
         mEndSnapRect.set(getWidth() - getPaddingEnd() - mItemWidth, getHeight() - getPaddingBottom() - mItemHeight, getWidth() - getPaddingEnd(), getHeight() - getPaddingBottom());
 
@@ -361,23 +343,23 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     }
 
-//    @Nullable
-//    @Override
-//    public View findViewByPosition(int position) {
-//        final int childCount = getChildCount();
-//        if (childCount == 0) {
-//            return null;
-//        }
-//        final int firstChild = getPosition(getChildAt(0));
-//        final int viewPosition = position - firstChild;
-//        if (viewPosition >= 0 && viewPosition < childCount) {
-//            final View child = getChildAt(viewPosition);
-//            if (getPosition(child) == position) {
-//                return child;
-//            }
-//        }
-//        return super.findViewByPosition(position);
-//    }
+    @Nullable
+    @Override
+    public View findViewByPosition(int position) {
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            return null;
+        }
+        final int firstChild = getPosition(getChildAt(0));
+        final int viewPosition = position - firstChild;
+        if (viewPosition >= 0 && viewPosition < childCount) {
+            final View child = getChildAt(viewPosition);
+            if (getPosition(child) == position) {
+                return child;
+            }
+        }
+        return super.findViewByPosition(position);
+    }
 
 
     @Override
@@ -409,6 +391,32 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Override
     public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
         return super.computeVerticalScrollOffset(state);
+    }
+
+    @Nullable
+    @Override
+    public Parcelable onSaveInstanceState() {
+        SavedState state = new SavedState();
+        state.mOrientation = mOrientation;
+        state.mRows = mRows;
+        state.mColumns = mColumns;
+        state.mCurrentPagerIndex = mCurrentPagerIndex;
+        return state;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof SavedState) {
+            SavedState savedState = (SavedState) state;
+            mOrientation = savedState.mOrientation;
+            mRows = savedState.mRows;
+            mColumns = savedState.mColumns;
+            setCurrentPagerIndex(savedState.mCurrentPagerIndex);
+            requestLayout();
+            if (DEBUG) {
+                Log.d(TAG, "loaded saved state");
+            }
+        }
     }
 
     @Override
@@ -480,7 +488,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
         super.onDetachedFromWindow(view, recycler);
         if (mRecyclerView != null) {
-            mRecyclerView.removeOnItemTouchListener(onItemTouchListener);
+            if (onItemTouchListener != null) {
+                mRecyclerView.removeOnItemTouchListener(onItemTouchListener);
+            }
             mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         }
         mPagerGridSnapHelper.attachToRecyclerView(null);
@@ -488,14 +498,26 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mPagerChangedListener = null;
     }
 
+    /**
+     * 设置监听回调
+     *
+     * @param listener
+     */
     public void setPagerChangedListener(@Nullable PagerChangedListener listener) {
         mPagerChangedListener = listener;
     }
 
     /**
-     * 一页的数量
+     * 设置滑动状态监听
      *
-     * @return
+     * @param listener
+     */
+    public void setPagerScrollStateListener(@Nullable PagerScrollStateListener listener) {
+        mPagerScrollStateListener = listener;
+    }
+
+    /**
+     * @return 一页的数量
      */
     public final int getOnePageSize() {
         return mOnePageSize;
@@ -508,9 +530,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (mColumns == columns) {
             return;
         }
+        mColumns = Math.max(columns, 1);
         mPagerCount = NO_ITEM;
         mCurrentPagerIndex = NO_ITEM;
-        mColumns = columns;
         requestLayout();
     }
 
@@ -529,7 +551,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (mRows == rows) {
             return;
         }
-        mRows = rows;
+        mRows = Math.max(rows, 1);
         mPagerCount = NO_ITEM;
         mCurrentPagerIndex = NO_ITEM;
         requestLayout();
@@ -557,8 +579,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
         if (orientation != mOrientation) {
             mOrientation = orientation;
-            mPagerCount = NO_ITEM;
-            mCurrentPagerIndex = NO_ITEM;
 
             requestLayout();
         }
@@ -573,6 +593,13 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     /**
+     * @return 获取最大页数
+     */
+    public final int getMaxPagerIndex() {
+        return getPagerIndexByPosition(getItemCount() - 1);
+    }
+
+    /**
      * 直接滚到第几页
      *
      * @param pagerIndex 第几页
@@ -582,7 +609,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         //先找到目标position所在第几页
-        pagerIndex = Math.min(pagerIndex, getMaxPagerIndex());
+        pagerIndex = Math.min(Math.max(pagerIndex, 0), getMaxPagerIndex());
         if (pagerIndex == mCurrentPagerIndex) {
             //同一页直接return
             return;
@@ -591,12 +618,24 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         requestLayout();
     }
 
+    /**
+     * 直接滚动到上一页
+     */
     public void scrollToPrePager() {
-
+        if (!isIdle()) {
+            return;
+        }
+        scrollToPagerIndex(mCurrentPagerIndex - 1);
     }
 
+    /**
+     * 直接滚动到下一页
+     */
     public void scrollToNextPager() {
-
+        if (!isIdle()) {
+            return;
+        }
+        scrollToPagerIndex(mCurrentPagerIndex + 1);
     }
 
     /**
@@ -695,12 +734,29 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 获取当前的页码
      *
-     * @return -1：{@link #getItemCount()} is 0
-     * @since {{@link #NO_ITEM}}
+     * @return -1：{@link #getItemCount()} is 0,{@link #NO_ITEM} . else {@link #mCurrentPagerIndex}
      */
     @IntRange(from = -1)
     public final int getCurrentPagerIndex() {
         return mCurrentPagerIndex;
+    }
+
+    /**
+     * 由于View类中这个方法无法使用，直接copy处理
+     *
+     * @param view
+     * @return 判断view是不是处在一个可滑动的布局中
+     * @see ViewGroup#shouldDelayChildPressedState()
+     */
+    private boolean isInScrollingContainer(View view) {
+        ViewParent p = view.getParent();
+        while (p instanceof ViewGroup) {
+            if (((ViewGroup) p).shouldDelayChildPressedState()) {
+                return true;
+            }
+            p = p.getParent();
+        }
+        return false;
     }
 
     /**
@@ -714,12 +770,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return isLayoutToEnd ? pagerIndex * mOnePageSize : pagerIndex * mOnePageSize + mOnePageSize - 1;
     }
 
-    /**
-     * @return 获取最大页数
-     */
-    private int getMaxPagerIndex() {
-        return getPagerIndexByPosition(getItemCount() - 1);
-    }
 
     /**
      * 获取真实宽度
@@ -897,6 +947,29 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         //移动
         offsetChildren(-scrolled);
         mLayoutState.mLastScrollDelta = scrolled;
+        if (scrolled == 0) {
+            //说明滑动到头部或尾部
+            if (delta < 0) {
+                if (!isScrollToStart) {
+                    isScrollToStart = true;
+                    if (mPagerScrollStateListener != null) {
+                        mPagerScrollStateListener.onScrollToStart();
+                    }
+                }
+                isScrollToEnd = false;
+            } else {
+                if (!isScrollToEnd) {
+                    isScrollToEnd = true;
+                    if (mPagerScrollStateListener != null) {
+                        mPagerScrollStateListener.onScrollToEnd();
+                    }
+                }
+                isScrollToStart = false;
+            }
+        } else {
+            isScrollToStart = false;
+            isScrollToEnd = false;
+        }
         if (DEBUG) {
             Log.i(TAG, "scrollBy: childCount:" + getChildCount() + ",recycler.scrapList.size:" + recycler.getScrapList().size() + ",delta:" + delta + ",scrolled:" + scrolled);
         }
@@ -1230,6 +1303,73 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
     }
 
+    /**
+     * @see RecyclerView#onSaveInstanceState()
+     * @see RecyclerView#onRestoreInstanceState(Parcelable)
+     */
+    protected static class SavedState implements Parcelable {
+        /**
+         * 当前滑动方向
+         */
+        protected int mOrientation;
+        /**
+         * 行数
+         */
+        protected int mRows;
+        /**
+         * 列数
+         */
+        protected int mColumns;
+        /**
+         * 当前页码下标
+         * 从0开始
+         */
+        protected int mCurrentPagerIndex = NO_ITEM;
+
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.mOrientation);
+            dest.writeInt(this.mRows);
+            dest.writeInt(this.mColumns);
+            dest.writeInt(this.mCurrentPagerIndex);
+        }
+
+        public void readFromParcel(Parcel source) {
+            this.mOrientation = source.readInt();
+            this.mRows = source.readInt();
+            this.mColumns = source.readInt();
+            this.mCurrentPagerIndex = source.readInt();
+        }
+
+        public SavedState() {
+        }
+
+        protected SavedState(Parcel in) {
+            this.mOrientation = in.readInt();
+            this.mRows = in.readInt();
+            this.mColumns = in.readInt();
+            this.mCurrentPagerIndex = in.readInt();
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
     public interface PagerChangedListener {
         /**
          * 页面总数量变化
@@ -1245,5 +1385,22 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
          * @param currentPagerIndex 当前的页码，当{{@link #getItemCount()}}为0时，为-1，{{@link #NO_ITEM}}
          */
         void onPagerIndexSelected(@IntRange(from = -1) int prePagerIndex, @IntRange(from = -1) int currentPagerIndex);
+    }
+
+    /**
+     * 滑动状态监听
+     */
+    public interface PagerScrollStateListener {
+        /**
+         * 滑动到了头部
+         * scroll to start.
+         */
+        void onScrollToStart();
+
+        /**
+         * 滑动到了尾部
+         * scroll to end.
+         */
+        void onScrollToEnd();
     }
 }
