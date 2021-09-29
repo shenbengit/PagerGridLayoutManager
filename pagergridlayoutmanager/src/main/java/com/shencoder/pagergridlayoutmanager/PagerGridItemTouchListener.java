@@ -35,12 +35,6 @@ class PagerGridItemTouchListener extends RecyclerView.SimpleOnItemTouchListener 
     }
 
     @Override
-    public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-        Log.i(TAG, "onTouchEvent-action: " + e.getAction());
-        gestureDetector.onTouchEvent(e);
-    }
-
-    @Override
     public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         Log.i(TAG, "onRequestDisallowInterceptTouchEvent: ");
     }
@@ -49,20 +43,26 @@ class PagerGridItemTouchListener extends RecyclerView.SimpleOnItemTouchListener 
         private static final String TAG = "ItemTouchListener";
 
         @Override
-        public boolean onDown(MotionEvent e) {
-            Log.i(TAG, "onDown: ");
-            return super.onDown(e);
-        }
-
-        @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             Log.i(TAG, "onScroll-distanceX: " + distanceX + ",distanceY: " + distanceY);
+            int distance = (int) (layoutManager.canScrollHorizontally() ? distanceX : distanceY);
+            if (layoutManager.canScrollHorizontally()) {
+                recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollHorizontally(distance));
+            } else {
+                recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollVertically(distance));
+            }
             return false;
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.i(TAG, "onFling-velocityX: " + velocityX + ",velocityY: " + velocityY);
+            int distance = (int) (layoutManager.canScrollHorizontally() ? velocityX : velocityY);
+            if (layoutManager.canScrollHorizontally()) {
+                recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollHorizontally(distance));
+            } else {
+                recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollVertically(distance));
+            }
             return false;
         }
     }
