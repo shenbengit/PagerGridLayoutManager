@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    tools:context=".activity.MainActivity">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvPagerIndex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="-"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/tv_"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rv" />
+
+    <TextView
+        android:id="@+id/tv_"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="/"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/tvPagerIndex"
+        app:layout_constraintEnd_toStartOf="@id/tvPagerCount"
+        app:layout_constraintStart_toEndOf="@id/tvPagerIndex"
+        app:layout_constraintTop_toTopOf="@id/tvPagerIndex" />
+
+    <TextView
+        android:id="@+id/tvPagerCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/tvPagerIndex"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_"
+        app:layout_constraintTop_toTopOf="@id/tvPagerIndex" />
+
+    <TextView
+        android:id="@+id/tvOrientation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="滑动方向："
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvPagerIndex" />
+
+    <RadioGroup
+        android:id="@+id/rgOrientation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/tvOrientation"
+        app:layout_constraintStart_toEndOf="@id/tvOrientation"
+        app:layout_constraintTop_toTopOf="@id/tvOrientation">
+
+        <RadioButton
+            android:id="@+id/rbHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="HORIZONTAL" />
+
+        <RadioButton
+            android:id="@+id/rbVertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VERTICAL" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/tvHint2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注意：水平和垂直排列方式不一致。"
+        android:textColor="@android:color/holo_red_dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvOrientation" />
+
+    <EditText
+        android:id="@+id/etRows"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:hint="行数"
+        android:inputType="number"
+        android:singleLine="true"
+        android:text="3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHint2" />
+
+    <Button
+        android:id="@+id/btnSetRows"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置行数"
+        app:layout_constraintBottom_toBottomOf="@id/etRows"
+        app:layout_constraintStart_toEndOf="@id/etRows"
+        app:layout_constraintTop_toTopOf="@id/etRows" />
+
+    <EditText
+        android:id="@+id/etColumns"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:hint="列数"
+        android:inputType="number"
+        android:singleLine="true"
+        android:text="3"
+        app:layout_constraintBottom_toBottomOf="@id/etRows"
+        app:layout_constraintStart_toEndOf="@id/btnSetRows"
+        app:layout_constraintTop_toTopOf="@id/etRows" />
+
+    <Button
+        android:id="@+id/btnSetColumns"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置列数"
+        app:layout_constraintBottom_toBottomOf="@id/etRows"
+        app:layout_constraintStart_toEndOf="@id/etColumns"
+        app:layout_constraintTop_toTopOf="@id/etRows" />
+
+    <EditText
+        android:id="@+id/etPosition"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:hint="滚动的位置"
+        android:inputType="number"
+        android:singleLine="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etRows" />
+
+    <Button
+        android:id="@+id/btnScrollToPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="直接滚动到指定位置"
+        app:layout_constraintBottom_toBottomOf="@id/etPosition"
+        app:layout_constraintStart_toEndOf="@id/etPosition"
+        app:layout_constraintTop_toTopOf="@id/etPosition" />
+
+    <Button
+        android:id="@+id/btnSmoothScrollToPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平滑滚动到指定位置"
+        app:layout_constraintBottom_toBottomOf="@id/etPosition"
+        app:layout_constraintStart_toEndOf="@id/btnScrollToPosition"
+        app:layout_constraintTop_toTopOf="@id/etPosition" />
+
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注意：滚动到的是指定位置对应的页"
+        android:textColor="@android:color/holo_red_dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etPosition" />
+
+    <EditText
+        android:id="@+id/etPagerIndex"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:hint="滚动的页下标"
+        android:inputType="number"
+        android:singleLine="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHint" />
+
+    <Button
+        android:id="@+id/btnScrollToPagerIndex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="直接滚动到指定页"
+        app:layout_constraintBottom_toBottomOf="@id/etPagerIndex"
+        app:layout_constraintStart_toEndOf="@id/etPagerIndex"
+        app:layout_constraintTop_toTopOf="@id/etPagerIndex" />
+
+    <Button
+        android:id="@+id/btnSmoothScrollToPagerIndex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平滑滚动到指定页"
+        app:layout_constraintBottom_toBottomOf="@id/etPagerIndex"
+        app:layout_constraintStart_toEndOf="@id/btnScrollToPagerIndex"
+        app:layout_constraintTop_toTopOf="@id/etPagerIndex" />
+
+    <TextView
+        android:id="@+id/tvHint1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注意平滑滚动：如果滚动的页与当前页超过3，避免长时间滚动，会先直接滚动到就近的附近，再做平滑滚动"
+        android:textColor="@android:color/holo_red_dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etPagerIndex" />
+
+    <Button
+        android:id="@+id/btnPrePager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="直接滚动到上一页"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHint1" />
+
+    <Button
+        android:id="@+id/btnNextPager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="直接滚动到下一页"
+        app:layout_constraintStart_toEndOf="@id/btnPrePager"
+        app:layout_constraintTop_toTopOf="@id/btnPrePager" />
+
+    <Button
+        android:id="@+id/btnSmoothPrePager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平滑滚动到上一页"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPrePager" />
+
+    <Button
+        android:id="@+id/btnSmoothNextPager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平滑滚动到下一页"
+        app:layout_constraintStart_toEndOf="@id/btnSmoothPrePager"
+        app:layout_constraintTop_toTopOf="@id/btnSmoothPrePager" />
+
+    <Button
+        android:id="@+id/btnAddDataToStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="向头部插入一条数据"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnSmoothPrePager" />
+
+    <Button
+        android:id="@+id/btnAddDataToEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="向尾部插入一条数据"
+        app:layout_constraintBottom_toBottomOf="@id/btnAddDataToStart"
+        app:layout_constraintStart_toEndOf="@id/btnAddDataToStart"
+        app:layout_constraintTop_toTopOf="@id/btnAddDataToStart" />
+
+    <Button
+        android:id="@+id/btnDeleteDataFromStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="从头部删除一条数据"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnAddDataToStart" />
+
+    <Button
+        android:id="@+id/btnDeleteDataFromEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="从尾部删除一条数据"
+        app:layout_constraintBottom_toBottomOf="@id/btnDeleteDataFromStart"
+        app:layout_constraintStart_toEndOf="@id/btnDeleteDataFromStart"
+        app:layout_constraintTop_toTopOf="@id/btnDeleteDataFromStart" />
+
+    <Button
+        android:id="@+id/btnVp1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:text="跳转到ViewPager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnVp2"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnVp2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="跳转到ViewPager2"
+        app:layout_constraintBottom_toBottomOf="@id/btnVp1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnVp1"
+        app:layout_constraintTop_toTopOf="@id/btnVp1" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

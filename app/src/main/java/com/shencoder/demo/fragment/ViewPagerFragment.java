@@ -1,6 +1,7 @@
 package com.shencoder.demo.fragment;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,13 +43,17 @@ public class ViewPagerFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        view.findViewById(R.id.btnVp2).setOnClickListener(v -> requireActivity().startActivity(new Intent(requireActivity(), ViewPager2Activity.class)));
         rv = view.findViewById(R.id.rv);
-        Log.w(TAG, "onViewCreated: "+rv.getLayoutManager());
+        rv.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.set(20, 5, 15, 10);
+            }
+        });
 
         final TextView tvPagerIndex = view.findViewById(R.id.tvPagerIndex);
         final TextView tvPagerCount = view.findViewById(R.id.tvPagerCount);
-        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(3, 4, PagerGridLayoutManager.HORIZONTAL);
+        PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(3, 3, PagerGridLayoutManager.HORIZONTAL);
         layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedListener() {
             @Override
             public void onPagerCountChanged(int pagerCount) {
@@ -62,13 +67,10 @@ public class ViewPagerFragment extends Fragment {
                 Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
             }
         });
-//        LinearLayoutManager layoutManager = new MyLinearLayoutManager(requireContext(),  LinearLayoutManager.HORIZONTAL, false);
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
         rv.setAdapter(adapter);
         adapter.setOnItemClickListener((adapter1, view1, position) -> {
-//            adapter.removeAt(position);
-//            adapter.addData(0, new TestBean(111, "111"));
             Toast.makeText(requireContext(), "点击了位置：" + position, Toast.LENGTH_SHORT).show();
         });
         List<TestBean> list = new ArrayList<>();

@@ -28,26 +28,27 @@ public class TestAdapter extends BaseQuickAdapter<TestBean, BaseViewHolder> {
 
     @Override
     protected void onItemViewHolderCreated(@NonNull BaseViewHolder viewHolder, int viewType) {
-        Log.i(TAG, "onItemViewHolderCreated: ");
+        Log.i(TAG, "onCreateViewHolder: ");
     }
 
     @Override
     protected void convert(@NonNull BaseViewHolder holder, TestBean testBean) {
         int position = holder.getLayoutPosition() - getHeaderLayoutCount();
-        Log.i(TAG, "convert: " + position);
-        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
-        if (layoutManager instanceof PagerGridLayoutManager) {
-            int onePageSize = ((PagerGridLayoutManager) layoutManager).getOnePageSize();
-            if (position % onePageSize == 0) {
-                holder.setTextColor(R.id.tvItem, Color.RED);
-            } else if (position % onePageSize == onePageSize - 1) {
-                holder.setTextColor(R.id.tvItem, Color.GREEN);
-            } else {
-                holder.setTextColor(R.id.tvItem, Color.WHITE);
-            }
-        } else {
-            holder.setTextColor(R.id.tvItem, Color.WHITE);
-        }
+        Log.i(TAG, "onBindViewHolder-position: " + position);
+//        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+//        if (layoutManager instanceof PagerGridLayoutManager) {
+//            int onePageSize = ((PagerGridLayoutManager) layoutManager).getOnePageSize();
+//            if (position % onePageSize == 0) {
+//                holder.setTextColor(R.id.tvItem, Color.RED);
+//            } else if (position % onePageSize == onePageSize - 1) {
+//                holder.setTextColor(R.id.tvItem, Color.GREEN);
+//            } else {
+//                holder.setTextColor(R.id.tvItem, Color.WHITE);
+//            }
+//        } else {
+//            holder.setTextColor(R.id.tvItem, Color.WHITE);
+//        }
+        holder.setTextColor(R.id.tvItem, Color.WHITE);
         holder.setText(R.id.tvItem, testBean.getName());
     }
 }
