@@ -1,4 +1,4 @@
-package com.shencoder.demo;
+package com.shencoder.demo.bean;
 
 /**
  * @author ShenBen

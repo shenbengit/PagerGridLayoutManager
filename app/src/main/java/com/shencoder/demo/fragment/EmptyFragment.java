@@ -1,4 +1,4 @@
-package com.shencoder.demo;
+package com.shencoder.demo.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.shencoder.demo.R;
 
 public class EmptyFragment extends Fragment {
     public static final String TITLE = "TITLE";

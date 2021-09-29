@@ -1,15 +1,16 @@
-package com.shencoder.demo;
+package com.shencoder.demo.adapter;
 
 
 import android.graphics.Color;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.viewholder.BaseViewHolder;
+import com.shencoder.demo.R;
+import com.shencoder.demo.bean.TestBean;
 import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
 
 
