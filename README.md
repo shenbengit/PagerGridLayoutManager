@@ -15,6 +15,7 @@
 - 支持scrollToPosition()和smoothScrollToPosition()
 - 兼容输入法弹出导致onLayoutChildren()方法重新调用的问题
 - 支持scrollBar
+- 状态恢复
 
 ## 引入
 ### 将JitPack存储库添加到您的项目中(项目根目录下build.gradle文件)
