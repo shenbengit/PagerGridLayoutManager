@@ -44,6 +44,9 @@ dependencies {
 
 ### 使用PagerGridLayoutManager
 ```java
+//是否开启调试日志
+PagerGridLayoutManager.setDebug(BuildConfig.DEBUG);
+
 PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(/*rows*/3, /*columns*/ 3, /*PagerGridLayoutManager.VERTICAL*/PagerGridLayoutManager.HORIZONTAL);
 recyclerView.setLayoutManager(layoutManager);
 
