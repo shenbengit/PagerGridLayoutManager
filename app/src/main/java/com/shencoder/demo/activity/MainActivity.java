@@ -16,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.shencoder.demo.BuildConfig;
 import com.shencoder.demo.R;
 import com.shencoder.demo.adapter.TestAdapter;
 import com.shencoder.demo.bean.TestBean;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         EditText etPosition = findViewById(R.id.etPosition);
         EditText etPagerIndex = findViewById(R.id.etPagerIndex);
 
+        PagerGridLayoutManager.setDebug(BuildConfig.DEBUG);
 
         findViewById(R.id.btnVp1).setOnClickListener(v -> {
             startActivity(new Intent(this, ViewPagerActivity.class));
