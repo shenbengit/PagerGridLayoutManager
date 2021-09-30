@@ -36,7 +36,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 是否启用Debug
      */
-    public static final boolean DEBUG = false;
+    static boolean DEBUG = BuildConfig.DEBUG;
     /**
      * 水平滑动
      */
@@ -163,6 +163,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mRows = Math.max(rows, 1);
         mColumns = Math.max(columns, 1);
         setOrientation(orientation);
+    }
+
+    /**
+     * print logcat
+     *
+     * @param debug is debug
+     */
+    public static void setDebug(boolean debug) {
+        DEBUG = debug;
     }
 
     /**
@@ -1200,7 +1209,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             View childAt = getChildAt(i);
             if (childAt != null) {
                 int position = getPosition(childAt);
-                if (position % getOnePageSize() == 0) {
+                if (position % mOnePageSize == 0) {
                     firstSnapPosition = position;
                     break;
                 }
@@ -1208,6 +1217,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
         if (firstSnapPosition == RecyclerView.NO_POSITION) {
             return null;
+        }
+        if (DEBUG) {
+            Log.w(TAG, "computeScrollVectorForPosition-firstSnapPosition: " + firstSnapPosition + ", targetPosition:" + targetPosition);
         }
         float direction = targetPosition < firstSnapPosition ? -1f : 1f;
         if (mOrientation == HORIZONTAL) {

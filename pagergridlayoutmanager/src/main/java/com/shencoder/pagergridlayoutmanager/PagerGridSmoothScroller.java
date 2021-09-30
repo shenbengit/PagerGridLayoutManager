@@ -20,7 +20,12 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
 
     private final RecyclerView mRecyclerView;
     private static final float MILLISECONDS_PER_INCH = 100f;
-    private static final int MAX_SCROLL_ON_FLING_DURATION = 100; //ms
+    /**
+     * 要保证最小滑行时间，不然可能会出现划过再回退的情况
+     *
+     * @see #calculateTimeForScrolling(int)
+     */
+    private static final int MIN_SCROLL_ON_FLING_DURATION = 300; //ms
 
     PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
         super(recyclerView.getContext());
@@ -75,8 +80,8 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
     }
 
     @Override
-    protected int calculateTimeForScrolling(int dx) {
-        return Math.min(MAX_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
+    protected final int calculateTimeForScrolling(int dx) {
+        return Math.min(MIN_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
     }
 
     public static int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
