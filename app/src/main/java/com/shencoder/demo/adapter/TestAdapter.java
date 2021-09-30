@@ -13,6 +13,9 @@ import com.shencoder.demo.R;
 import com.shencoder.demo.bean.TestBean;
 import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * @author ShenBen
@@ -29,6 +32,14 @@ public class TestAdapter extends BaseQuickAdapter<TestBean, BaseViewHolder> {
     @Override
     protected void onItemViewHolderCreated(@NonNull BaseViewHolder viewHolder, int viewType) {
         Log.i(TAG, "onCreateViewHolder: ");
+    }
+
+    @Override
+    protected void convert(@NonNull BaseViewHolder holder, TestBean item, @NonNull List<?> payloads) {
+        int position = holder.getLayoutPosition() - getHeaderLayoutCount();
+        Log.i(TAG, "onBindViewHolder-position: " + position + ",payloads: " + Arrays.toString(payloads.toArray()));
+        holder.setTextColor(R.id.tvItem, Color.WHITE);
+        holder.setText(R.id.tvItem, item.getName());
     }
 
     @Override

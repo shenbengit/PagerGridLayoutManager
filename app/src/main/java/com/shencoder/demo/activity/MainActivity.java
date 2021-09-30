@@ -155,9 +155,16 @@ public class MainActivity extends AppCompatActivity {
                 adapter.removeAt(adapter.getData().size() - 1);
             }
         });
+        findViewById(R.id.btnUpdateFirstData).setOnClickListener(v -> {
+            if (!adapter.getData().isEmpty()) {
+                adapter.getItem(0).setName("我更新了");
+                adapter.notifyItemChanged(0);
+            }
+//            adapter.notifyItemRangeChanged(0, 5);
+        });
 
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 1500; i++) {
+        for (int i = 0; i < 26; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);

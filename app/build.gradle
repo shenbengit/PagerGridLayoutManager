@@ -19,6 +19,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 
     compileOptions {
@@ -39,5 +44,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.6'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
     implementation project(path: ':pagergridlayoutmanager')
+//    implementation 'com.github.shenbengit:PagerGridLayoutManager:0.0.1'
 }
