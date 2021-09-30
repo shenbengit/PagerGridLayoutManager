@@ -221,11 +221,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     @Override
-    public boolean isAutoMeasureEnabled() {
-        return true;
-    }
-
-    @Override
     public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state, int widthSpec, int heightSpec) {
         int widthMode = View.MeasureSpec.getMode(widthSpec);
         int heightMode = View.MeasureSpec.getMode(heightSpec);
