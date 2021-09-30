@@ -36,7 +36,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 是否启用Debug
      */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     /**
      * 水平滑动
      */
@@ -200,11 +200,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (DEBUG) {
             Log.d(TAG, "onAttachedToWindow: ");
         }
-        if (isInScrollingContainer(view)) {
-            //在一个可滑动的布局中，再添加监听
-            onItemTouchListener = new PagerGridItemTouchListener(this, view);
-            view.addOnItemTouchListener(onItemTouchListener);
-        }
+//        if (isInScrollingContainer(view)) {
+        //在一个可滑动的布局中，再添加监听，功能还没开发完成，先不添加
+//            onItemTouchListener = new PagerGridItemTouchListener(this, view);
+//            view.addOnItemTouchListener(onItemTouchListener);
+//        }
         view.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
@@ -440,6 +440,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Nullable
     @Override
     public Parcelable onSaveInstanceState() {
+        if (DEBUG) {
+            Log.d(TAG, "onSaveInstanceState: ");
+        }
         SavedState state = new SavedState();
         state.mOrientation = mOrientation;
         state.mRows = mRows;
@@ -458,7 +461,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             setCurrentPagerIndex(savedState.mCurrentPagerIndex);
             requestLayout();
             if (DEBUG) {
-                Log.d(TAG, "loaded saved state");
+                Log.d(TAG, "onRestoreInstanceState: loaded saved state");
             }
         }
     }
@@ -549,9 +552,14 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 mRecyclerView.removeOnItemTouchListener(onItemTouchListener);
             }
             mRecyclerView.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
+            mRecyclerView = null;
         }
         mPagerGridSnapHelper.attachToRecyclerView(null);
-        mRecyclerView = null;
+        mPagerGridSnapHelper = null;
+        //这里不能置为null，因为在ViewPager2嵌套Fragment使用，
+        //部分情况下Fragment不回调onDestroyView，但会导致onDetachedFromWindow触发。
+        //所以如果想置null，请调用{@link #setPagerChangedListener(null)}
+//        mPagerChangedListener = null;
     }
 
     /**
@@ -1408,6 +1416,16 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 return new SavedState[size];
             }
         };
+
+        @Override
+        public String toString() {
+            return "SavedState{" +
+                    "mOrientation=" + mOrientation +
+                    ", mRows=" + mRows +
+                    ", mColumns=" + mColumns +
+                    ", mCurrentPagerIndex=" + mCurrentPagerIndex +
+                    '}';
+        }
     }
 
     public interface PagerChangedListener {

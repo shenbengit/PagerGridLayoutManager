@@ -158,7 +158,9 @@ class PagerGridSnapHelper extends SnapHelper {
                 targetPosition = manager.getPosition(snapList.get(1));
                 break;
             default:
-                Log.w(TAG, "findTargetSnapPosition-snapList.size: " + snapList.size());
+                if (PagerGridLayoutManager.DEBUG) {
+                    Log.w(TAG, "findTargetSnapPosition-snapList.size: " + snapList.size());
+                }
                 break;
         }
         if (PagerGridLayoutManager.DEBUG) {
@@ -201,7 +203,9 @@ class PagerGridSnapHelper extends SnapHelper {
                     snapView = snapList.get(1);
                     break;
                 default:
-                    Log.w(TAG, "findSnapView-snapList.size: " + snapList.size());
+                    if (PagerGridLayoutManager.DEBUG) {
+                        Log.w(TAG, "findSnapView-snapList.size: " + snapList.size());
+                    }
                     break;
             }
             snapList.clear();
