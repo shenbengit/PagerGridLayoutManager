@@ -116,5 +116,5 @@ layoutManager.smoothScrollToNextPager();
 > 此库不需要额外混淆
 
 如果此库对您有帮助，欢迎star!
-
+# [CHANGE LOG](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/CHANGE%20LOG.md)
 # [License](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/LICENSE)
