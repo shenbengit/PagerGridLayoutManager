@@ -135,7 +135,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * @see #onMeasure(RecyclerView.Recycler, RecyclerView.State, int, int)
      */
     private int diffHeight = 0;
-
+    /**
+     * 是否启用处理滑动冲突滑动冲突，默认开启
+     * 只会在{@link RecyclerView} 在可滑动布局{@link #isInScrollingContainer(View)}中起作用
+     */
+    private boolean isHandlingSlidingConflictsEnabled = true;
     private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
         @Override
         public void onChildViewAttachedToWindow(@NonNull View view) {
@@ -143,7 +147,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             //判断ItemLayout的宽高是否是match_parent
             if (layoutParams.width != ViewGroup.LayoutParams.MATCH_PARENT
                     || layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
-                throw new IllegalStateException("item layout must use match_parent");
+                throw new IllegalStateException("Item layout  must fill the whole PagerGridLayoutManager (use match_parent)");
             }
         }
 
@@ -209,11 +213,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (DEBUG) {
             Log.d(TAG, "onAttachedToWindow: ");
         }
-//        if (isInScrollingContainer(view)) {
-        //在一个可滑动的布局中，再添加监听，功能还没开发完成，先不添加
-//            onItemTouchListener = new PagerGridItemTouchListener(this, view);
-//            view.addOnItemTouchListener(onItemTouchListener);
-//        }
+        if (isInScrollingContainer(view)) {
+            //在一个可滑动的布局中
+            if (isHandlingSlidingConflictsEnabled) {
+                onItemTouchListener = new PagerGridItemTouchListener(this, view);
+                view.addOnItemTouchListener(onItemTouchListener);
+            } else {
+                //不启用的话可以自行解决
+            }
+        }
         view.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
         mPagerGridSnapHelper = new PagerGridSnapHelper();
         mPagerGridSnapHelper.attachToRecyclerView(view);
@@ -411,8 +419,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (getChildCount() == 0 || state.getItemCount() == 0) {
             return 0;
         }
-        //目前先这么算吧。。。后面再优化
-        int scrollOffset = Math.max(mCurrentPagerIndex, 0) * getEnd();
+        View firstView = getChildAt(0);
+        if (firstView == null) {
+            return 0;
+        }
+        int position = getPosition(firstView);
+        final float avgSize = (float) getEnd() / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        //所在行或者列
+        int index = position / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        int scrollOffset = Math.round(index * avgSize + (getStartAfterPadding() - getDecoratedStart(firstView)));
         if (DEBUG) {
             Log.i(TAG, "computeScrollOffset: " + scrollOffset);
         }
@@ -575,6 +590,18 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mPagerChangedListener = listener;
     }
 
+    /**
+     * 是否启用处理滑动冲突滑动冲突，默认true
+     * 这个方法必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
+     * you must call this method before {@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)}
+     *
+     * @param enabled 是否启用
+     * @see #isInScrollingContainer(View)
+     * @see #onAttachedToWindow(RecyclerView)
+     */
+    public final void setHandlingSlidingConflictsEnabled(boolean enabled) {
+        isHandlingSlidingConflictsEnabled = enabled;
+    }
 
     public final int getItemWidth() {
         return mItemWidth;
