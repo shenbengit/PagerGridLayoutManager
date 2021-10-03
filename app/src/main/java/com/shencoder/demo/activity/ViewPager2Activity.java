@@ -32,7 +32,7 @@ public class ViewPager2Activity extends AppCompatActivity {
         ViewPager2FragmentAdapter adapter = new ViewPager2FragmentAdapter(this);
         vp.setAdapter(adapter);
 
-        vp.setUserInputEnabled(false);
+//        vp.setUserInputEnabled(false);
 
         mediator = new TabLayoutMediator(tabLayout, vp, (tab, position) -> tab.setText(adapter.getItem(position).getTitle()));
         mediator.attach();

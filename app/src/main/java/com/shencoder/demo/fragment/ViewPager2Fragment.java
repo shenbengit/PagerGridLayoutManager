@@ -1,6 +1,5 @@
 package com.shencoder.demo.fragment;
 
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -9,22 +8,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.chad.library.adapter.base.listener.OnItemLongClickListener;
 import com.shencoder.demo.R;
-import com.shencoder.demo.activity.ViewPager2Activity;
-import com.shencoder.demo.activity.ViewPagerActivity;
 import com.shencoder.demo.adapter.TestAdapter;
 import com.shencoder.demo.bean.TestBean;
 import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
@@ -74,6 +65,13 @@ public class ViewPager2Fragment extends Fragment {
                 Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
             }
         });
+        /*
+         是否启用处理滑动冲突滑动冲突，default: true；若不需要库中自带的处理方式，则置为false，自行处理。
+         setHandlingSlidingConflictsEnabled() 必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
+         you must call this method before {@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)}
+        */
+        layoutManager.setHandlingSlidingConflictsEnabled(true);
+
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
         rv.setAdapter(adapter);
@@ -82,7 +80,7 @@ public class ViewPager2Fragment extends Fragment {
         });
 
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 1500; i++) {
+        for (int i = 0; i < 50; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);

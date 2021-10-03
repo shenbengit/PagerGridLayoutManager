@@ -1,6 +1,5 @@
 package com.shencoder.demo.fragment;
 
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shencoder.demo.R;
-import com.shencoder.demo.activity.ViewPager2Activity;
 import com.shencoder.demo.adapter.TestAdapter;
 import com.shencoder.demo.bean.TestBean;
 import com.shencoder.pagergridlayoutmanager.PagerGridLayoutManager;
@@ -74,7 +72,7 @@ public class ViewPagerFragment extends Fragment {
             Toast.makeText(requireContext(), "点击了位置：" + position, Toast.LENGTH_SHORT).show();
         });
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 1500; i++) {
+        for (int i = 0; i < 50; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
