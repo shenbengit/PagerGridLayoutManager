@@ -1,6 +1,9 @@
 Change Log:
 
-**v1.0.1**:    
+**v1.0.2**:
+- 修复gradle7.0在jitpack中打包失败问题；    
+
+~~**v1.0.1**~~:    
 - 添加滑动冲突处理；    
 - 完善PagerGridLayoutManager中computeHorizontalScrollOffset()、computeVerticalScrollOffset()计算方法；    
 
