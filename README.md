@@ -9,6 +9,10 @@
 |:---:|:---:|
 |<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/%E6%BB%9A%E5%8A%A8%E5%88%B0%E6%8C%87%E5%AE%9A%E9%A1%B5.gif" alt="滚动到指定页" width="250px">|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/%E5%85%B6%E4%BB%96%E6%93%8D%E4%BD%9C.gif" alt="其他操作" width="250px">|
 
+|ViewPager中使用|ViewPager2中使用|
+|:---:|:---:|
+|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="ViewPager中使用" width="250px">|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager2%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="其他操作" width="250px">|
+
 
 ## 功能特点
 - 复用机制和视图回收
@@ -16,6 +20,7 @@
 - 兼容输入法弹出导致onLayoutChildren()方法重新调用的问题
 - 支持scrollBar
 - 状态恢复
+- 滑动冲突处理
 
 ## 引入
 ### 将JitPack存储库添加到您的项目中(项目根目录下build.gradle文件)
@@ -37,10 +42,10 @@ dependencies {
 ```
 ## 快速使用
 ### 注意事项
-> 1、RecyclerView的**宽高**必须指定，match_parent或者例如100dp等。 (RecyclerView's width and height must be exactly. )    
-> 2、item布局的**宽高**必须是match_parent。(item layout must use match_parent.)    
+> 1、RecyclerView的**宽高**必须指定，match_parent或者例如100dp等。 (RecyclerView's width and height must be **exactly**. )    
+> 2、item布局的**宽高**必须是**match_parent**。(item layout's width and height must use **match_parent**.)    
 > 3、在ViewPager中使用是正常的，ViewPager已经处理好了滑动冲突。    
-> 4、在ViewPager2中使用存在滑动冲突，ViewPager2未做滑动冲突处理，需自行实现，如需使用要自行处理冲突。这个后续加入。。。
+> 4、在ViewPager2中使用存在滑动冲突，ViewPager2未做滑动冲突处理，**本库已经处理滑动冲突**，若不满足您的需求可自行处理。
 
 ### 使用PagerGridLayoutManager
 ```java
@@ -48,6 +53,13 @@ dependencies {
 PagerGridLayoutManager.setDebug(BuildConfig.DEBUG);
 
 PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(/*rows*/3, /*columns*/ 3, /*PagerGridLayoutManager.VERTICAL*/PagerGridLayoutManager.HORIZONTAL);
+/*
+是否启用处理滑动冲突滑动冲突，default: true；若不需要库中自带的处理方式，则置为false，自行处理。
+setHandlingSlidingConflictsEnabled() 必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
+you must call this method before {@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)}
+*/
+layoutManager.setHandlingSlidingConflictsEnabled(true);
+
 recyclerView.setLayoutManager(layoutManager);
 
 //设置监听
