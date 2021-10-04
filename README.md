@@ -11,7 +11,7 @@
 
 |ViewPager中使用|ViewPager2中使用|
 |:---:|:---:|
-|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="ViewPager中使用" width="250px">|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager2%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="其他操作" width="250px">|
+|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="ViewPager中使用" width="250px">|<img src="https://github.com/shenbengit/PagerGridLayoutManager/blob/master/screenshots/ViewPager2%E4%B8%AD%E4%BD%BF%E7%94%A8.gif" alt="ViewPager2中使用" width="250px">|
 
 
 ## 功能特点
