@@ -74,6 +74,9 @@ public class ViewPager2Fragment extends Fragment {
 
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
+        adapter.setOnItemClickListener((adapter1, view1, position) -> {
+            Toast.makeText(requireContext(), "点击了位置：" + position, Toast.LENGTH_SHORT).show();
+        });
         rv.setAdapter(adapter);
         adapter.setOnItemClickListener((adapter1, view1, position) -> {
             Toast.makeText(requireContext(), "点击了位置：" + position, Toast.LENGTH_SHORT).show();
