@@ -39,11 +39,11 @@ class PagerGridSnapHelper extends SnapHelper {
     @Nullable
     @Override
     protected RecyclerView.SmoothScroller createScroller(@NonNull RecyclerView.LayoutManager layoutManager) {
-        if (!(layoutManager instanceof RecyclerView.SmoothScroller.ScrollVectorProvider)) {
+        if (!(layoutManager instanceof PagerGridLayoutManager)) {
             return null;
         }
         if (mRecyclerView != null) {
-            return new PagerGridSmoothScroller(mRecyclerView);
+            return new PagerGridSmoothScroller(mRecyclerView, (PagerGridLayoutManager) layoutManager);
         }
         return null;
     }

@@ -17,19 +17,23 @@ import androidx.recyclerview.widget.RecyclerView;
  */
 class PagerGridSmoothScroller extends LinearSmoothScroller {
     private static final String TAG = "PagerGridSmoothScroller";
-
+    @NonNull
+    private final PagerGridLayoutManager mLayoutManager;
+    @NonNull
     private final RecyclerView mRecyclerView;
-    private static final float MILLISECONDS_PER_INCH = 100f;
     /**
-     * 要保证最小滑行时间，不然可能会出现划过再回退的情况
-     *
+     * @see #calculateSpeedPerPixel(DisplayMetrics)
+     */
+    static final float MILLISECONDS_PER_INCH = 70f;
+    /**
      * @see #calculateTimeForScrolling(int)
      */
-    private static final int MIN_SCROLL_ON_FLING_DURATION = 300; //ms
+    static final int MAX_SCROLL_ON_FLING_DURATION = 200; //ms
 
-    PagerGridSmoothScroller(@NonNull RecyclerView recyclerView) {
+    PagerGridSmoothScroller(@NonNull RecyclerView recyclerView, @NonNull PagerGridLayoutManager layoutManager) {
         super(recyclerView.getContext());
         mRecyclerView = recyclerView;
+        mLayoutManager = layoutManager;
     }
 
     /**
@@ -74,14 +78,26 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
         }
     }
 
+    /**
+     * 不可过小，不然可能会出现划过再回退的情况
+     *
+     * @param displayMetrics
+     * @return 值越大，滚动速率越慢，反之
+     */
     @Override
     protected float calculateSpeedPerPixel(DisplayMetrics displayMetrics) {
-        return MILLISECONDS_PER_INCH / displayMetrics.densityDpi;
+        return mLayoutManager.getMillisecondPreInch() / displayMetrics.densityDpi;
     }
 
+    /**
+     * 为避免长时间滚动，设置一个最大滚动时间
+     *
+     * @param dx 滚动的像素距离
+     * @return 值越大，滑动时间越长，滚动速率越慢，反之
+     */
     @Override
     protected final int calculateTimeForScrolling(int dx) {
-        return Math.min(MIN_SCROLL_ON_FLING_DURATION, super.calculateTimeForScrolling(dx));
+        return Math.min(mLayoutManager.getMaxScrollOnFlingDuration(), super.calculateTimeForScrolling(dx));
     }
 
     public static int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {

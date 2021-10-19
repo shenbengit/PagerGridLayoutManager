@@ -6,17 +6,20 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.FloatRange;
 import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
@@ -140,6 +143,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * 只会在{@link RecyclerView} 在可滑动布局{@link #isInScrollingContainer(View)}中起作用
      */
     private boolean isHandlingSlidingConflictsEnabled = true;
+    private float mMillisecondPreInch = PagerGridSmoothScroller.MILLISECONDS_PER_INCH;
+    private int mMaxScrollOnFlingDuration = PagerGridSmoothScroller.MAX_SCROLL_ON_FLING_DURATION;
+
     private final RecyclerView.OnChildAttachStateChangeListener onChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() {
         @Override
         public void onChildViewAttachedToWindow(@NonNull View view) {
@@ -603,6 +609,54 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         isHandlingSlidingConflictsEnabled = enabled;
     }
 
+    public final boolean isHandlingSlidingConflictsEnabled() {
+        return isHandlingSlidingConflictsEnabled;
+    }
+
+    /**
+     * 设置滑动每像素需要花费的时间，不可过小，不然可能会出现划过再回退的情况
+     * 默认值：{@link PagerGridSmoothScroller#MILLISECONDS_PER_INCH}
+     * <p>
+     * set millisecond pre inch. not too small.
+     * default value: {@link PagerGridSmoothScroller#MILLISECONDS_PER_INCH}
+     *
+     * @param millisecondPreInch 值越大，滚动速率越慢，反之
+     * @see PagerGridSmoothScroller#calculateSpeedPerPixel(DisplayMetrics)
+     */
+    public final void setMillisecondPreInch(@FloatRange(from = 1) float millisecondPreInch) {
+        mMillisecondPreInch = Math.max(1f, millisecondPreInch);
+    }
+
+    /**
+     * @return 滑动每像素需要花费的时间
+     * @see PagerGridSmoothScroller#calculateSpeedPerPixel(DisplayMetrics)
+     */
+    public final float getMillisecondPreInch() {
+        return mMillisecondPreInch;
+    }
+
+    /**
+     * 设置最大滚动时间，如果您想此值无效，请使用{@link Integer#MAX_VALUE}
+     * 默认值：{@link PagerGridSmoothScroller#MAX_SCROLL_ON_FLING_DURATION}，单位：毫秒
+     * <p>
+     * set max scroll on fling duration.If you want this value to expire, use {@link Integer#MAX_VALUE}
+     * default value: {@link PagerGridSmoothScroller#MAX_SCROLL_ON_FLING_DURATION},Unit: ms
+     *
+     * @param maxScrollOnFlingDuration 值越大，滑动时间越长，滚动速率越慢，反之
+     * @see PagerGridSmoothScroller#calculateTimeForScrolling(int)
+     */
+    public final void setMaxScrollOnFlingDuration(@IntRange(from = 1) int maxScrollOnFlingDuration) {
+        mMaxScrollOnFlingDuration = Math.max(1, maxScrollOnFlingDuration);
+    }
+
+    /**
+     * @return 最大滚动时间
+     * @see PagerGridSmoothScroller#calculateTimeForScrolling(int)
+     */
+    public final int getMaxScrollOnFlingDuration() {
+        return mMaxScrollOnFlingDuration;
+    }
+
     public final int getItemWidth() {
         return mItemWidth;
     }
@@ -759,7 +813,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 mRecyclerView.post(new SmoothScrollToPosition(getPositionByPagerIndex(pagerIndex, isLayoutToEnd), this, mRecyclerView));
             }
         } else {
-            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
+            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView, this);
             smoothScroller.setTargetPosition(getPositionByPagerIndex(pagerIndex, isLayoutToEnd));
             startSmoothScroll(smoothScroller);
         }
@@ -1293,7 +1347,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
         @Override
         public void run() {
-            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView);
+            PagerGridSmoothScroller smoothScroller = new PagerGridSmoothScroller(mRecyclerView, mLayoutManager);
             smoothScroller.setTargetPosition(mPosition);
             mLayoutManager.startSmoothScroll(smoothScroller);
         }
