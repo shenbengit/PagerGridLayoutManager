@@ -46,5 +46,5 @@ dependencies {
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.6'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
     implementation project(path: ':pagergridlayoutmanager')
-//    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.0'
+//    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.2'
 }
