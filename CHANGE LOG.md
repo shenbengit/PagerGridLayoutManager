@@ -1,4 +1,9 @@
-Change Log:
+Change Log:    
+
+**v1.0.3**    
+- minSdkVersion降低至14；
+- 添加设置滑动速率api；
+- 处理滑动冲突方法优化。
 
 **v1.0.2**:
 - 修复gradle7.0在jitpack中打包失败问题；    
