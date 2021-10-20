@@ -74,12 +74,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
             }
         });
-        /*
-         是否启用处理滑动冲突滑动冲突，default: true；若不需要库中自带的处理方式，则置为false，自行处理。
-         setHandlingSlidingConflictsEnabled() 必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
-         you must call this method before {@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)}
-        */
-        layoutManager.setHandlingSlidingConflictsEnabled(true);
 
         //设置滑动每像素需要花费的时间
         layoutManager.setMillisecondPreInch(70);

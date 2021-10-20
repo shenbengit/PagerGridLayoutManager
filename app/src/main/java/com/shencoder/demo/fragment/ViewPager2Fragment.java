@@ -66,6 +66,12 @@ public class ViewPager2Fragment extends Fragment {
             }
         });
 
+        /*
+         是否启用处理滑动冲突滑动冲突，default: true；若不需要库中自带的处理方式，则置为false，自行处理。
+         setHandlingSlidingConflictsEnabled() 必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
+         you must call this method before {@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)}
+        */
+        layoutManager.setHandlingSlidingConflictsEnabled(true);
 
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
