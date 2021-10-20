@@ -15,6 +15,7 @@
 
 
 ## 功能特点
+- 水平垂直分页滑动
 - 复用机制和视图回收
 - 支持scrollToPosition()和smoothScrollToPosition()
 - 兼容输入法弹出导致onLayoutChildren()方法重新调用的问题
@@ -33,7 +34,7 @@ allprojects {
 }
 ```
 ### 添加依赖
-[![](https://jitpack.io/v/shenbengit/PagerGridLayoutManager.svg)](https://jitpack.io/#shenbengit/PagerGridLayoutManager)
+[![](https://jitpack.io/v/shenbengit/PagerGridLayoutManager.svg)](https://jitpack.io/#shenbengit/PagerGridLayoutManager) [change log](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/CHANGE%20LOG.md)
 > 在您引入项目的build.gradle中添加
 ```gradle
 dependencies {
@@ -109,12 +110,16 @@ layoutManager.scrollToNextPager();
 layoutManager.smoothScrollToPrePager();
 //平滑滚动到下一页
 layoutManager.smoothScrollToNextPager();
+//设置滑动每像素需要花费的时间，不可过小，不然可能会出现划过再回退的情况。默认值：70
+layoutManager.setMillisecondPreInch(70);
+//设置最大滚动时间，如果您想此值无效，请使用{@link Integer#MAX_VALUE}。默认值：200 ms
+layoutManager.setMaxScrollOnFlingDuration(200);
 
 ```
 
 ### proguard-rules.pro
 > 此库不需要额外混淆
 
-如果此库对您有帮助，欢迎star!
-# [CHANGE LOG](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/CHANGE%20LOG.md)
+如果此库对您有用，欢迎给个**star**！
+
 # [License](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/LICENSE)
