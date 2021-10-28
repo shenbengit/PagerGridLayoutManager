@@ -52,6 +52,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * @see #mCurrentPagerIndex
      */
     public static final int NO_ITEM = -1;
+    public static final int NO_PAGER_COUNT = 0;
 
     @RestrictTo(LIBRARY_GROUP_PREFIX)
     @IntDef({HORIZONTAL, VERTICAL})
@@ -82,7 +83,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 总页数
      */
-    private int mPagerCount = NO_ITEM;
+    private int mPagerCount = NO_PAGER_COUNT;
     /**
      * 当前页码下标
      * 从0开始
@@ -170,10 +171,10 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns, @Orientation int orientation) {
-        mRows = Math.max(rows, 1);
-        mColumns = Math.max(columns, 1);
         mLayoutState = createLayoutState();
         mLayoutChunkResult = createLayoutChunkResult();
+        setRows(rows);
+        setColumns(columns);
         setOrientation(orientation);
 
     }
@@ -285,7 +286,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         int itemCount = getItemCount();
         if (itemCount == 0) {
             removeAndRecycleAllViews(recycler);
-            setPagerCount(0);
+            setPagerCount(NO_PAGER_COUNT);
             setCurrentPagerIndex(NO_ITEM);
             return;
         }
@@ -650,7 +651,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         mColumns = Math.max(columns, 1);
-        mPagerCount = NO_ITEM;
+        mPagerCount = NO_PAGER_COUNT;
         mCurrentPagerIndex = NO_ITEM;
         requestLayout();
     }
@@ -671,7 +672,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             return;
         }
         mRows = Math.max(rows, 1);
-        mPagerCount = NO_ITEM;
+        mPagerCount = NO_PAGER_COUNT;
         mCurrentPagerIndex = NO_ITEM;
         requestLayout();
     }
@@ -1518,6 +1519,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             }
         };
 
+        @NonNull
         @Override
         public String toString() {
             return "SavedState{" +
@@ -1533,7 +1535,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         /**
          * 页面总数量变化
          *
-         * @param pagerCount 页面总数
+         * @param pagerCount 页面总数，从1开始，为0时说明无数据，{{@link #NO_PAGER_COUNT}}
          */
         void onPagerCountChanged(@IntRange(from = 0) int pagerCount);
 
