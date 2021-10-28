@@ -108,9 +108,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 用于保存一些状态
      */
-    private final LayoutState mLayoutState = new LayoutState();
+    private final LayoutState mLayoutState;
 
-    private final LayoutChunkResult mLayoutChunkResult = new LayoutChunkResult();
+    private final LayoutChunkResult mLayoutChunkResult;
     /**
      * 用于计算锚点坐标-左上角第一个view的位置
      */
@@ -172,7 +172,18 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     public PagerGridLayoutManager(@IntRange(from = 1) int rows, @IntRange(from = 1) int columns, @Orientation int orientation) {
         mRows = Math.max(rows, 1);
         mColumns = Math.max(columns, 1);
+        mLayoutState = createLayoutState();
+        mLayoutChunkResult = createLayoutChunkResult();
         setOrientation(orientation);
+
+    }
+
+    protected LayoutState createLayoutState() {
+        return new LayoutState();
+    }
+
+    protected LayoutChunkResult createLayoutChunkResult() {
+        return new LayoutChunkResult();
     }
 
     /**
@@ -419,47 +430,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     @Override
     public int computeHorizontalScrollRange(@NonNull RecyclerView.State state) {
         return computeScrollRange(state);
-    }
-
-    private int computeScrollOffset(RecyclerView.State state) {
-        if (getChildCount() == 0 || state.getItemCount() == 0) {
-            return 0;
-        }
-        View firstView = getChildAt(0);
-        if (firstView == null) {
-            return 0;
-        }
-        int position = getPosition(firstView);
-        final float avgSize = (float) getEnd() / (mOrientation == HORIZONTAL ? mColumns : mRows);
-        //所在行或者列
-        int index = position / (mOrientation == HORIZONTAL ? mColumns : mRows);
-        int scrollOffset = Math.round(index * avgSize + (getStartAfterPadding() - getDecoratedStart(firstView)));
-        if (DEBUG) {
-            Log.i(TAG, "computeScrollOffset: " + scrollOffset);
-        }
-        return scrollOffset;
-    }
-
-    private int computeScrollExtent(RecyclerView.State state) {
-        if (getChildCount() == 0 || state.getItemCount() == 0) {
-            return 0;
-        }
-        int scrollExtent = getEnd();
-        if (DEBUG) {
-            Log.i(TAG, "computeScrollExtent: " + scrollExtent);
-        }
-        return scrollExtent;
-    }
-
-    private int computeScrollRange(RecyclerView.State state) {
-        if (getChildCount() == 0 || state.getItemCount() == 0) {
-            return 0;
-        }
-        int scrollRange = Math.max(mPagerCount, 0) * getEnd();
-        if (DEBUG) {
-            Log.i(TAG, "computeScrollRange: " + scrollRange);
-        }
-        return scrollRange;
     }
 
     @Nullable
@@ -1168,7 +1138,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 if (decorated > start) {
                     continue;
                 }
-                removeAndRecycleView(childAt, recycler);
+                removeAndRecycleViewAt(i, recycler);
+//                removeAndRecycleView(childAt, recycler);
             }
         }
     }
@@ -1183,7 +1154,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 if (decorated < end) {
                     continue;
                 }
-                removeAndRecycleView(childAt, recycler);
+                removeAndRecycleViewAt(i, recycler);
+//                removeAndRecycleView(childAt, recycler);
             }
         }
     }
@@ -1244,6 +1216,47 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      */
     private boolean isNeedMoveToPreSpan(int position) {
         return mOrientation == HORIZONTAL ? position % mRows == mRows - 1 : position % mColumns == mColumns - 1;
+    }
+
+    private int computeScrollOffset(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        View firstView = getChildAt(0);
+        if (firstView == null) {
+            return 0;
+        }
+        int position = getPosition(firstView);
+        final float avgSize = (float) getEnd() / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        //所在行或者列
+        int index = position / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        int scrollOffset = Math.round(index * avgSize + (getStartAfterPadding() - getDecoratedStart(firstView)));
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollOffset: " + scrollOffset);
+        }
+        return scrollOffset;
+    }
+
+    private int computeScrollExtent(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        int scrollExtent = getEnd();
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollExtent: " + scrollExtent);
+        }
+        return scrollExtent;
+    }
+
+    private int computeScrollRange(RecyclerView.State state) {
+        if (getChildCount() == 0 || state.getItemCount() == 0) {
+            return 0;
+        }
+        int scrollRange = Math.max(mPagerCount, 0) * getEnd();
+        if (DEBUG) {
+            Log.i(TAG, "computeScrollRange: " + scrollRange);
+        }
+        return scrollRange;
     }
 
     /**
