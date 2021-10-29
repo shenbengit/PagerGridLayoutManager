@@ -278,14 +278,14 @@ class PagerGridSnapHelper extends SnapHelper {
         }
     }
 
-    private int calculateDxToNextPager(PagerGridLayoutManager manager, Rect targetRect) {
+    static int calculateDxToNextPager(PagerGridLayoutManager manager, Rect targetRect) {
         if (!manager.canScrollHorizontally()) {
             return 0;
         }
         return getLayoutEndAfterPadding(manager) - targetRect.left;
     }
 
-    private int calculateDyToNextPager(PagerGridLayoutManager manager, Rect targetRect) {
+    static int calculateDyToNextPager(PagerGridLayoutManager manager, Rect targetRect) {
         if (!manager.canScrollVertically()) {
             return 0;
         }
@@ -299,39 +299,39 @@ class PagerGridSnapHelper extends SnapHelper {
      * @param targetView
      * @return
      */
-    private int distanceToCenter(RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
+    static int distanceToCenter(RecyclerView.LayoutManager layoutManager, @NonNull View targetView) {
         //布局中心位置，水平滑动为X轴坐标，垂直滑动为Y轴坐标
         final int layoutCenter = getLayoutCenter(layoutManager);
         final int childCenter = getChildViewCenter(layoutManager, targetView);
         return childCenter - layoutCenter;
     }
 
-    private int getLayoutCenter(RecyclerView.LayoutManager layoutManager) {
+    static int getLayoutCenter(RecyclerView.LayoutManager layoutManager) {
         return getLayoutStartAfterPadding(layoutManager) + getLayoutTotalSpace(layoutManager) / 2;
     }
 
-    private int getLayoutStartAfterPadding(RecyclerView.LayoutManager layoutManager) {
+    static int getLayoutStartAfterPadding(RecyclerView.LayoutManager layoutManager) {
         return layoutManager.canScrollHorizontally() ? layoutManager.getPaddingStart() : layoutManager.getPaddingTop();
     }
 
-    private int getLayoutEndAfterPadding(RecyclerView.LayoutManager layoutManager) {
+    static int getLayoutEndAfterPadding(RecyclerView.LayoutManager layoutManager) {
         return layoutManager.canScrollHorizontally() ?
                 layoutManager.getWidth() - layoutManager.getPaddingRight()
                 : layoutManager.getHeight() - layoutManager.getPaddingBottom();
     }
 
-    private int getLayoutTotalSpace(RecyclerView.LayoutManager layoutManager) {
+    static int getLayoutTotalSpace(RecyclerView.LayoutManager layoutManager) {
         return layoutManager.canScrollHorizontally() ?
                 layoutManager.getWidth() - layoutManager.getPaddingStart() - layoutManager.getPaddingEnd() :
                 layoutManager.getHeight() - layoutManager.getPaddingTop() - layoutManager.getPaddingBottom();
     }
 
-    private int getChildViewCenter(RecyclerView.LayoutManager layoutManager, View targetView) {
+    static int getChildViewCenter(RecyclerView.LayoutManager layoutManager, View targetView) {
         return getViewDecoratedStart(layoutManager, targetView)
                 + (getViewDecoratedMeasurement(layoutManager, targetView) / 2);
     }
 
-    private int getViewDecoratedStart(RecyclerView.LayoutManager layoutManager, View view) {
+    static int getViewDecoratedStart(RecyclerView.LayoutManager layoutManager, View view) {
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
         if (layoutManager.canScrollHorizontally()) {
             return layoutManager.getDecoratedLeft(view) - params.leftMargin;
@@ -340,7 +340,7 @@ class PagerGridSnapHelper extends SnapHelper {
         }
     }
 
-    private int getViewDecoratedEnd(RecyclerView.LayoutManager layoutManager, View view) {
+    static int getViewDecoratedEnd(RecyclerView.LayoutManager layoutManager, View view) {
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
         if (layoutManager.canScrollHorizontally()) {
             return layoutManager.getDecoratedRight(view) - params.rightMargin;
@@ -349,7 +349,7 @@ class PagerGridSnapHelper extends SnapHelper {
         }
     }
 
-    private int getViewDecoratedMeasurement(RecyclerView.LayoutManager layoutManager, View view) {
+    static int getViewDecoratedMeasurement(RecyclerView.LayoutManager layoutManager, View view) {
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
         if (layoutManager.canScrollHorizontally()) {
             return layoutManager.getDecoratedMeasuredWidth(view) + params.leftMargin + params.rightMargin;
@@ -357,6 +357,4 @@ class PagerGridSnapHelper extends SnapHelper {
             return layoutManager.getDecoratedMeasuredHeight(view) + params.topMargin + params.bottomMargin;
         }
     }
-
-
 }

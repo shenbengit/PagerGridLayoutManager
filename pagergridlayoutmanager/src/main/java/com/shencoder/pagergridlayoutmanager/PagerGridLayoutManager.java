@@ -19,7 +19,6 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
@@ -176,7 +175,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         setRows(rows);
         setColumns(columns);
         setOrientation(orientation);
-
     }
 
     protected LayoutState createLayoutState() {
@@ -330,11 +328,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (pagerIndex == NO_ITEM) {
             pagerIndex = 0;
         } else {
-            int maxPagerIndex = getMaxPagerIndex();
-            if (pagerIndex > maxPagerIndex) {
-                //如果之前的PagerIndex大于最大的PagerSize
-                pagerIndex = maxPagerIndex;
-            }
+            //取上次PagerIndex和最大MaxPagerIndex中最小值。
+            pagerIndex = Math.min(pagerIndex, getMaxPagerIndex());
         }
 
         mLayoutState.mCurrentPosition = pagerIndex * mOnePageSize;
