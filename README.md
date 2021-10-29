@@ -68,7 +68,7 @@ layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedLis
     /**
      * 页数回调
      * 仅会在页数变化时回调
-     * @param pagerCount 页数，从1开始
+     * @param pagerCount 页数，从1开始，为0时说明无数据
      */
     @Override
     public void onPagerCountChanged(int pagerCount) {
