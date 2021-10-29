@@ -1,5 +1,8 @@
 Change Log:    
 
+**v1.0.4**    
+- 优化代码结构；    
+
 **v1.0.3**    
 - minSdkVersion降低至14；
 - 添加设置滑动速率api；
