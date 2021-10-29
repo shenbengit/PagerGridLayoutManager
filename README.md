@@ -34,11 +34,13 @@ allprojects {
 }
 ```
 ### 添加依赖
-[![](https://jitpack.io/v/shenbengit/PagerGridLayoutManager.svg)](https://jitpack.io/#shenbengit/PagerGridLayoutManager) [change log](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/CHANGE%20LOG.md)
+[change log](https://github.com/shenbengit/PagerGridLayoutManager/blob/1.0.x/CHANGE%20LOG.md)
 > 在您引入项目的build.gradle中添加
 ```gradle
 dependencies {
-    implementation 'com.github.shenbengit:PagerGridLayoutManager:Tag'
+    //水平排列方式：先从上到下，再从左到右
+    //Horizontal arrangement: from top to bottom, then from left to right
+    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.4'
 }
 ```
 ## 快速使用
