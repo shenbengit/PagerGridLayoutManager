@@ -177,14 +177,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         setOrientation(orientation);
     }
 
-    protected LayoutState createLayoutState() {
-        return new LayoutState();
-    }
-
-    protected LayoutChunkResult createLayoutChunkResult() {
-        return new LayoutChunkResult();
-    }
-
     /**
      * print logcat
      *
@@ -805,6 +797,14 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         smoothScrollToPagerIndex(mCurrentPagerIndex + 1);
     }
 
+    protected LayoutState createLayoutState() {
+        return new LayoutState();
+    }
+
+    protected LayoutChunkResult createLayoutChunkResult() {
+        return new LayoutChunkResult();
+    }
+
     /**
      * 设置总页数
      *
@@ -1208,7 +1208,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     /**
      * @param position
-     * @return 是否需要换到下一行或列
+     * @return 是否需要换到上一行或列
      */
     private boolean isNeedMoveToPreSpan(int position) {
         return mOrientation == HORIZONTAL ? position % mRows == mRows - 1 : position % mColumns == mColumns - 1;
@@ -1225,7 +1225,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         int position = getPosition(firstView);
         final float avgSize = (float) getEnd() / (mOrientation == HORIZONTAL ? mColumns : mRows);
         //所在行或者列
-        int index = position / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        int index = position / (mOrientation == HORIZONTAL ? mRows : mColumns);
         int scrollOffset = Math.round(index * avgSize + (getStartAfterPadding() - getDecoratedStart(firstView)));
         if (DEBUG) {
             Log.i(TAG, "computeScrollOffset: " + scrollOffset);
