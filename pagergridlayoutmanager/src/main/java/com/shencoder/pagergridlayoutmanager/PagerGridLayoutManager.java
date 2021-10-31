@@ -177,14 +177,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         setOrientation(orientation);
     }
 
-    protected LayoutState createLayoutState() {
-        return new LayoutState();
-    }
-
-    protected LayoutChunkResult createLayoutChunkResult() {
-        return new LayoutChunkResult();
-    }
-
     /**
      * print logcat
      *
@@ -306,17 +298,12 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             int remain = itemCount % mOnePageSize;
             int replenish = 0;
             if (remain != 0) {
+                int i = remain / mColumns;
+                int k = remain % mColumns;
                 if (mOrientation == HORIZONTAL) {
-                    int i = remain / mRows;
-                    int k = remain % mRows;
-                    if (k != 0) {
-                        ++i;
-                    }
-                    replenish = (mColumns - i) * mItemWidth;
+                    replenish = (i == 0) ? (mColumns - k) * mItemWidth : 0;
                 } else {
-                    int i = remain / mColumns;
-                    int k = remain % mColumns;
-                    if (k != 0) {
+                    if (k > 0) {
                         ++i;
                     }
                     replenish = (mRows - i) * mItemHeight;
@@ -335,7 +322,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mLayoutState.mCurrentPosition = pagerIndex * mOnePageSize;
 
         mLayoutState.mRecycle = false;
-        mLayoutState.mItemDirection = LayoutState.ITEM_DIRECTION_TAIL;
         mLayoutState.mLayoutDirection = LayoutState.LAYOUT_END;
         mLayoutState.mAvailable = getEnd();
         mLayoutState.mScrollingOffset = LayoutState.SCROLLING_OFFSET_NaN;
@@ -805,6 +791,14 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         smoothScrollToPagerIndex(mCurrentPagerIndex + 1);
     }
 
+    protected LayoutState createLayoutState() {
+        return new LayoutState();
+    }
+
+    protected LayoutChunkResult createLayoutChunkResult() {
+        return new LayoutChunkResult();
+    }
+
     /**
      * 设置总页数
      *
@@ -943,15 +937,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         return start - layoutState.mAvailable;
     }
 
-    /**
-     * 填充View
-     * 直接绘制一行或者一列
-     *
-     * @param recycler
-     * @param state
-     * @param layoutState
-     * @param layoutChunkResult
-     */
     private void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state, LayoutState layoutState, LayoutChunkResult layoutChunkResult) {
         boolean layoutToEnd = layoutState.mLayoutDirection == LayoutState.LAYOUT_END;
         int position = layoutState.mCurrentPosition;
@@ -961,11 +946,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         } else {
             addView(view, 0);
         }
+        layoutState.mCurrentPosition = layoutState.getNextPosition(position, layoutToEnd, mOrientation, mRows, mColumns, state);
         measureChildWithMargins(view, mItemWidthUsed, mItemHeightUsed);
         //是否需要换行或者换列
         boolean isNeedMoveSpan = layoutToEnd ? isNeedMoveToNextSpan(position) : isNeedMoveToPreSpan(position);
-
-        layoutChunkResult.mConsumed = isNeedMoveSpan ? (mOrientation == HORIZONTAL ? mItemWidth : mItemHeight) : 0;
+        layoutChunkResult.mConsumed = isNeedMoveSpan ? mOrientation == HORIZONTAL ? mItemWidth : mItemHeight : 0;
 
         //记录的上一个View的位置
         Rect rect = layoutState.mOffsetRect;
@@ -1003,7 +988,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 right = left + mItemWidth;
             }
         } else {
-            //垂直滑动
             if (layoutToEnd) {
                 //向后填充，绘制方向：从左到右
                 if (isNeedMoveSpan) {
@@ -1077,7 +1061,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private void updateLayoutState(boolean layoutToEnd, int requiredSpace,
                                    boolean canUseExistingSpace, RecyclerView.State state) {
-        mLayoutState.mItemDirection = layoutToEnd ? LayoutState.ITEM_DIRECTION_TAIL : LayoutState.ITEM_DIRECTION_HEAD;
         View child;
         //计算在不添加新view的情况下可以滚动多少（与布局无关）
         int scrollingOffset;
@@ -1089,7 +1072,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             scrollingOffset = -getDecoratedStart(child) + getStartAfterPadding();
         }
         getDecoratedBoundsWithMargins(child, mLayoutState.mOffsetRect);
-        mLayoutState.mCurrentPosition = getPosition(child) + mLayoutState.mItemDirection;
+
+        mLayoutState.mCurrentPosition = mLayoutState.getNextPosition(getPosition(child), layoutToEnd, mOrientation, mRows, mColumns, state);
+
         mLayoutState.mAvailable = requiredSpace;
         if (canUseExistingSpace) {
             mLayoutState.mAvailable -= scrollingOffset;
@@ -1203,15 +1188,30 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
      * @return 是否需要换到下一行或列
      */
     private boolean isNeedMoveToNextSpan(int position) {
-        return mOrientation == HORIZONTAL ? position % mRows == 0 : position % mColumns == 0;
+        if (mOrientation == HORIZONTAL) {
+            int surplus = position % mOnePageSize;
+            int rowIndex = surplus / mColumns;
+            //是否在最后一行
+            return rowIndex == 0;
+        } else {
+            return position % mColumns == 0;
+        }
     }
 
     /**
      * @param position
-     * @return 是否需要换到下一行或列
+     * @return 是否需要换到上一行或列
      */
     private boolean isNeedMoveToPreSpan(int position) {
-        return mOrientation == HORIZONTAL ? position % mRows == mRows - 1 : position % mColumns == mColumns - 1;
+        if (mOrientation == HORIZONTAL) {
+            int surplus = position % mOnePageSize;
+            //在第几行
+            int rowIndex = surplus / mColumns;
+            //是否在第一行
+            return rowIndex == mRows - 1;
+        } else {
+            return position % mColumns == mColumns - 1;
+        }
     }
 
     private int computeScrollOffset(RecyclerView.State state) {
@@ -1224,8 +1224,15 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
         int position = getPosition(firstView);
         final float avgSize = (float) getEnd() / (mOrientation == HORIZONTAL ? mColumns : mRows);
-        //所在行或者列
-        int index = position / (mOrientation == HORIZONTAL ? mColumns : mRows);
+        int index;
+        if (mOrientation == HORIZONTAL) {
+            //所在第几列
+            int pagerIndex = getPagerIndexByPosition(position);
+            index = pagerIndex * mColumns + position % mColumns;
+        } else {
+            //所在第几行
+            index = position / mColumns;
+        }
         int scrollOffset = Math.round(index * avgSize + (getStartAfterPadding() - getDecoratedStart(firstView)));
         if (DEBUG) {
             Log.i(TAG, "computeScrollOffset: " + scrollOffset);
@@ -1368,9 +1375,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
         protected static final int LAYOUT_END = 1;
 
-        protected static final int ITEM_DIRECTION_HEAD = -1;
-
-        protected static final int ITEM_DIRECTION_TAIL = 1;
 
         protected static final int SCROLLING_OFFSET_NaN = Integer.MIN_VALUE;
 
@@ -1385,11 +1389,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
         protected int mCurrentPosition;
         /**
-         * 遍历Adapter数据的方向
-         * 值为 {@link #LAYOUT_START} or {@link #LAYOUT_END}
-         */
-        protected int mItemDirection;
-        /**
          * 布局的填充方向
          * 值为 {@link #LAYOUT_START} or {@link #LAYOUT_END}
          */
@@ -1403,7 +1402,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         /**
          * 开始绘制的坐标位置
          */
-        protected Rect mOffsetRect;
+        protected final Rect mOffsetRect = new Rect();
         /**
          * 最近一次的滑动数量
          */
@@ -1417,20 +1416,70 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         }
 
         protected void setOffsetRect(int left, int top, int right, int bottom) {
-            if (mOffsetRect == null) {
-                mOffsetRect = new Rect();
-            }
             mOffsetRect.set(left, top, right, bottom);
         }
 
         protected View next(RecyclerView.Recycler recycler) {
-            View view = recycler.getViewForPosition(mCurrentPosition);
-            mCurrentPosition += mItemDirection;
-            return view;
+            return recycler.getViewForPosition(mCurrentPosition);
         }
 
         protected boolean hasMore(RecyclerView.State state) {
             return mCurrentPosition >= 0 && mCurrentPosition < state.getItemCount();
+        }
+
+        protected int getNextPosition(int currentPosition, boolean layoutToEnd, int orientation, int rows, int columns, RecyclerView.State state) {
+            int position;
+            int onePageSize = rows * columns;
+            if (orientation == HORIZONTAL) {
+                int surplus = currentPosition % onePageSize;
+                //水平滑动
+                if (layoutToEnd) {
+                    //向后追加item
+                    if (surplus == onePageSize - 1) {
+                        //一页的最后一个位置
+                        position = currentPosition + 1;
+                    } else {
+                        //在第几列
+                        int columnsIndex = currentPosition % columns;
+                        //在第几行
+                        int rowIndex = surplus / columns;
+                        //是否在最后一行
+                        boolean isLastRow = rowIndex == rows - 1;
+                        if (isLastRow) {
+                            position = currentPosition - rowIndex * columns + 1;
+                        } else {
+                            position = currentPosition + columns;
+                            if (position >= state.getItemCount()) {
+                                //越界了
+                                if (columnsIndex != columns - 1) {
+                                    //如果不是最后一列，计算换行位置
+                                    position = currentPosition - rowIndex * columns + 1;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //向前追加item
+                    if (surplus == 0) {
+                        //一页的第一个位置
+                        position = currentPosition - 1;
+                    } else {
+                        //在第几行
+                        int rowIndex = surplus / columns;
+                        //是否在第一行
+                        boolean isFirstRow = rowIndex == 0;
+                        if (isFirstRow) {
+                            position = currentPosition - 1 + (rows - 1) * columns;
+                        } else {
+                            position = currentPosition - columns;
+                        }
+                    }
+                }
+            } else {
+                //垂直滑动
+                position = currentPosition + (layoutToEnd ? 1 : -1);
+            }
+            return position;
         }
     }
 
