@@ -1,5 +1,7 @@
 # PagerGridLayoutManager
 基于RecyclerView实现网格分页布局——PagerGridLayoutManager
+> 改分支只做功能bug修复，新功能请查看[master](https://github.com/shenbengit/PagerGridLayoutManager/tree/master)；    
+> 水平滑动排列方式：先从上到下，再从左到右；
 ## 运行效果
 |滑动方向|设置行数列数|滚动到指定位置|
 |:---:|:---:|:---:|
@@ -40,7 +42,7 @@ allprojects {
 dependencies {
     //水平排列方式：先从上到下，再从左到右
     //Horizontal arrangement: from top to bottom, then from left to right
-    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.4'
+    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.5'
 }
 ```
 ## 快速使用
