@@ -88,25 +88,17 @@
                     android:text="VERTICAL" />
             </RadioGroup>
 
-            <TextView
-                android:id="@+id/tvHint2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="注意：水平和垂直排列顺序不一致。"
-                android:textColor="@android:color/holo_red_dark"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvOrientation" />
-
             <EditText
                 android:id="@+id/etRows"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:hint="行数"
                 android:inputType="number"
                 android:singleLine="true"
                 android:text="3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvHint2" />
+                app:layout_constraintTop_toBottomOf="@id/tvOrientation" />
 
             <Button
                 android:id="@+id/btnSetRows"
@@ -293,7 +285,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
-                android:text="跳转到ViewPager"
+                android:text="Use in ViewPager"
                 app:layout_constraintEnd_toStartOf="@id/btnVp2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnUpdateFirstData" />
@@ -303,7 +295,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="跳转到ViewPager2"
+                android:text="Use in ViewPager2"
                 app:layout_constraintBottom_toBottomOf="@id/btnVp1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/btnVp1"
