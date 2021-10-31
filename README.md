@@ -35,9 +35,16 @@ allprojects {
 ```
 ### 添加依赖
 [![](https://jitpack.io/v/shenbengit/PagerGridLayoutManager.svg)](https://jitpack.io/#shenbengit/PagerGridLayoutManager) [change log](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/CHANGE%20LOG.md)
-> 在您引入项目的build.gradle中添加
+> 从v1.1.0版本开始，水平滑动排列方式改为先从左到右，再从上到下；若您需要水平滑动排列方式改为先从上到下，再从左到右的方式，请查看分支[1.0.x](https://github.com/shenbengit/PagerGridLayoutManager/tree/1.0.x)；        
+> 在您引入项目的build.gradle中添加：    
 ```gradle
 dependencies {
+    //水平排列方式：先从上到下，再从左到右。最终版本。
+    //Horizontal arrangement: from top to bottom, then from left to right. Final version.
+    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.5'
+    //或者 or 
+    //水平排列方式：先从左到右，再从上到下。最新版本。
+    //Horizontal arrangement: from left to right, then from top to bottom. Latest version.
     implementation 'com.github.shenbengit:PagerGridLayoutManager:Tag'
 }
 ```
