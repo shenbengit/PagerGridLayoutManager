@@ -1,4 +1,7 @@
-Change Log:    
+Change Log: 
+
+**v1.0.5**    
+- 修复computeHorizontalScrollOffset()、computeVerticalScrollOffset()计算错误问题；  
 
 **v1.0.4**    
 - 优化代码结构；    
