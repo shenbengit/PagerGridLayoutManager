@@ -1,0 +1,76 @@
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24__Default_Changelist_1.xml
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24__Default_Changelist_1.xml b/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24__Default_Changelist_1.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24__Default_Changelist_1.xml	(revision be6a1fe9c1121797049fd2505c8d606954450106)
++++ /dev/null	(revision be6a1fe9c1121797049fd2505c8d606954450106)
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1" date="1634703907332" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Update at 2021/10/20 12:24 [Default Changelist]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_2021_10_20_12_24_[Default_Changelist]1/shelved.patch	(revision be6a1fe9c1121797049fd2505c8d606954450106)
++++ /dev/null	(revision be6a1fe9c1121797049fd2505c8d606954450106)
+@@ -1,57 +0,0 @@
+-Index: pagergridlayoutmanager/src/main/java/com/shencoder/pagergridlayoutmanager/PagerGridItemTouchListener.java
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+>package com.shencoder.pagergridlayoutmanager;\r\n\r\nimport android.util.Log;\r\nimport android.view.MotionEvent;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\n\r\n/**\r\n * 处理滑动冲突\r\n *\r\n * @author ShenBen\r\n * @date 2021/9/28 09:24\r\n * @email 714081644@qq.com\r\n */\r\nclass PagerGridItemTouchListener extends RecyclerView.SimpleOnItemTouchListener {\r\n    private static final String TAG = \"ItemTouchListener\";\r\n\r\n    private final PagerGridLayoutManager layoutManager;\r\n    private final RecyclerView recyclerView;\r\n    private float startX;\r\n    private float startY;\r\n\r\n    PagerGridItemTouchListener(PagerGridLayoutManager layoutManager, RecyclerView recyclerView) {\r\n        this.layoutManager = layoutManager;\r\n        this.recyclerView = recyclerView;\r\n    }\r\n\r\n    @Override\r\n    public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {\r\n        if (PagerGridLayoutManager.DEBUG) {\r\n            Log.i(TAG, \"onInterceptTouchEvent-action: \" + e.getAction());\r\n        }\r\n        int action = e.getAction();\r\n        switch (action) {\r\n            case MotionEvent.ACTION_DOWN:\r\n                startX = e.getX();\r\n                startY = e.getY();\r\n                recyclerView.getParent().requestDisallowInterceptTouchEvent(true);\r\n                break;\r\n            case MotionEvent.ACTION_MOVE:\r\n                float x = e.getX();\r\n                float y = e.getY();\r\n\r\n                float disX = Math.abs(x - startX);\r\n                float disY = Math.abs(y - startY);\r\n                if (disX > disY) {\r\n                    if (layoutManager.canScrollHorizontally()) {\r\n                        recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollHorizontally((int) (startX - x)));\r\n                    } else {\r\n                        recyclerView.getParent().requestDisallowInterceptTouchEvent(false);\r\n                    }\r\n                } else {\r\n                    if (layoutManager.canScrollVertically()) {\r\n                        recyclerView.getParent().requestDisallowInterceptTouchEvent(recyclerView.canScrollVertically((int) (startY - y)));\r\n                    } else {\r\n                        recyclerView.getParent().requestDisallowInterceptTouchEvent(false);\r\n                    }\r\n                }\r\n                startX = x;\r\n                startY = y;\r\n                break;\r\n            case MotionEvent.ACTION_UP:\r\n            case MotionEvent.ACTION_CANCEL:\r\n                recyclerView.getParent().requestDisallowInterceptTouchEvent(false);\r\n                break;\r\n        }\r\n        return false;\r\n    }\r\n}\r\n
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/pagergridlayoutmanager/src/main/java/com/shencoder/pagergridlayoutmanager/PagerGridItemTouchListener.java b/pagergridlayoutmanager/src/main/java/com/shencoder/pagergridlayoutmanager/PagerGridItemTouchListener.java
+---- a/pagergridlayoutmanager/src/main/java/com/shencoder/pagergridlayoutmanager/PagerGridItemTouchListener.java	
+-+++ b/pagergridlayoutmanager/src/main/java/com/shencoder/pagergridlayoutmanager/PagerGridItemTouchListener.java	
+-@@ -31,14 +31,21 @@
+-         if (PagerGridLayoutManager.DEBUG) {
+-             Log.i(TAG, "onInterceptTouchEvent-action: " + e.getAction());
+-         }
+--        int action = e.getAction();
+-+
+-+        final int action = e.getActionMasked();
+-+        final int actionIndex = e.getActionIndex();
+-         switch (action) {
+--            case MotionEvent.ACTION_DOWN:
+-+            case MotionEvent.ACTION_DOWN: {
+-                 startX = e.getX();
+-                 startY = e.getY();
+-                 recyclerView.getParent().requestDisallowInterceptTouchEvent(true);
+--                break;
+--            case MotionEvent.ACTION_MOVE:
+-+            }
+-+            break;
+-+            case MotionEvent.ACTION_POINTER_DOWN: {
+-+
+-+            }
+-+            break;
+-+            case MotionEvent.ACTION_MOVE: {
+-                 float x = e.getX();
+-                 float y = e.getY();
+- 
+-@@ -59,11 +66,17 @@
+-                 }
+-                 startX = x;
+-                 startY = y;
+--                break;
+-+            }
+-+            break;
+-+            case MotionEvent.ACTION_POINTER_UP: {
+-+
+-+            }
+-+            break;
+-             case MotionEvent.ACTION_UP:
+--            case MotionEvent.ACTION_CANCEL:
+-+            case MotionEvent.ACTION_CANCEL: {
+-                 recyclerView.getParent().requestDisallowInterceptTouchEvent(false);
+--                break;
+-+            }
+-+            break;
+-         }
+-         return false;
+-     }

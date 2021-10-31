@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 40; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
