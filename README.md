@@ -39,13 +39,13 @@ allprojects {
 > 在您引入项目的build.gradle中添加：    
 ```gradle
 dependencies {
-    //水平排列方式：先从上到下，再从左到右。最终版本。
-    //Horizontal arrangement: from top to bottom, then from left to right. Final version.
-    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.5'
-    //或者 or 
     //水平排列方式：先从左到右，再从上到下。最新版本。
     //Horizontal arrangement: from left to right, then from top to bottom. Latest version.
     implementation 'com.github.shenbengit:PagerGridLayoutManager:Tag'
+    //或者 or 
+    //水平排列方式：先从上到下，再从左到右。最终版本。
+    //Horizontal arrangement: from top to bottom, then from left to right. Final version.
+    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.5'
 }
 ```
 ## 快速使用
