@@ -42,7 +42,7 @@ allprojects {
 dependencies {
     //水平排列方式：先从上到下，再从左到右
     //Horizontal arrangement: from top to bottom, then from left to right
-    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.5'
+    implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.6'
 }
 ```
 ## 快速使用
