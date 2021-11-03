@@ -1,5 +1,8 @@
 Change Log: 
 
+**v1.0.6**    
+- fix [#5](https://github.com/shenbengit/PagerGridLayoutManager/issues/5)； 
+
 **v1.0.5**    
 - 修复computeHorizontalScrollOffset()、computeVerticalScrollOffset()计算错误问题；  
 
