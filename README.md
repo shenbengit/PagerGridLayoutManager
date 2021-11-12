@@ -93,7 +93,7 @@ layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedLis
         Log.w(TAG, "onPagerIndexSelected-prePagerIndex " + prePagerIndex + ",currentPagerIndex:" + currentPagerIndex);
     }
 });
-//设置滑动方向，注意：水平和垂直排列顺序不一致。
+//设置滑动方向
 layoutManager.setOrientation(/*PagerGridLayoutManager.HORIZONTAL*/PagerGridLayoutManager.VERTICAL);
 //设置行数
 layoutManager.setRows(2);
