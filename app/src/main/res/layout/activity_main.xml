@@ -13,7 +13,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv"
         android:layout_width="match_parent"
-        android:layout_height="260dp" />
+        android:layout_height="260dp"
+        android:layout_margin="5dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -280,6 +281,14 @@
                 app:layout_constraintTop_toBottomOf="@id/btnDeleteDataFromStart" />
 
             <Button
+                android:id="@+id/btnUseGlide"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Glide中使用"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnUpdateFirstData" />
+
+            <Button
                 android:id="@+id/btnVp1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -288,7 +297,7 @@
                 android:text="Use in ViewPager"
                 app:layout_constraintEnd_toStartOf="@id/btnVp2"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnUpdateFirstData" />
+                app:layout_constraintTop_toBottomOf="@id/btnUseGlide" />
 
             <Button
                 android:id="@+id/btnVp2"

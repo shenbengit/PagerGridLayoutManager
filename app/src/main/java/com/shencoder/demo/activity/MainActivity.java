@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
         PagerGridLayoutManager.setDebug(BuildConfig.DEBUG);
 
+        findViewById(R.id.btnUseGlide).setOnClickListener(v -> {
+            startActivity(new Intent(this, GlideActivity.class));
+        });
         findViewById(R.id.btnVp1).setOnClickListener(v -> {
             startActivity(new Intent(this, ViewPagerActivity.class));
         });
@@ -172,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         List<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 50; i++) {
             list.add(new TestBean(i, String.valueOf(i)));
         }
         adapter.setList(list);
