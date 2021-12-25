@@ -10,6 +10,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.shencoder.demo.bean.MenuBean;
 import com.shencoder.demo.fragment.EmptyFragment;
+import com.shencoder.demo.fragment.NestedRecyclerViewFragment;
 import com.shencoder.demo.fragment.ViewPager2Fragment;
 
 import java.util.ArrayList;
@@ -53,7 +54,15 @@ public class ViewPager2FragmentAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         MenuBean item = getItem(position);
-        return item.isEmpty() ? EmptyFragment.newInstance(item.getTitle()) : ViewPager2Fragment.newInstance();
+        int i = position % 3;
+        switch (i) {
+            case 0:
+                return ViewPager2Fragment.newInstance();
+            case 1:
+                return NestedRecyclerViewFragment.newInstance();
+            default:
+                return EmptyFragment.newInstance(item.getTitle());
+        }
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.shencoder.demo.bean;
 
+import com.chad.library.adapter.base.entity.MultiItemEntity;
+import com.shencoder.demo.adapter.NestedRecyclerViewAdapter;
+
 /**
  * @author ShenBen
  * @date 2021/01/10 17:31
  * @email 714081644@qq.com
  */
-public class TestBean {
+public class TestBean implements MultiItemEntity {
     private int id;
     private String name;
     private boolean isChecked;
@@ -40,5 +43,10 @@ public class TestBean {
 
     public void setChecked(boolean checked) {
         isChecked = checked;
+    }
+
+    @Override
+    public int getItemType() {
+        return NestedRecyclerViewAdapter.TYPE_NORMAL;
     }
 }
