@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.shencoder.MyLinearLayoutManager;
 import com.shencoder.demo.R;
 import com.shencoder.demo.adapter.GlideAdapter;
 import com.shencoder.demo.bean.GlideBean;
