@@ -51,10 +51,9 @@ dependencies {
 ## 快速使用
 ### 注意事项
 > 1、RecyclerView的**宽高**必须指定，match_parent或者例如100dp等。 (RecyclerView's width and height must be **exactly**. )    
-> 2、Item布局的**宽高**必须是**match_parent**。(item layout's width and height must use **match_parent**.)    
-> 3、Item布局中若包含**ImageView**，使用Glide加载图片时，尽量不要让ImageView宽高使用**warp_content**，请尽量让ImageView宽高固定或Glide等库加载时指定宽高。原因是Glide偶发会导致LayoutManager.onLayoutChildren()被调用，出现[#7](https://github.com/shenbengit/PagerGridLayoutManager/issues/7)类似的问题；（其他的图片加载库也可能存在该问题）我在后续版本中将去解决这个问题。欢迎各路大神提出解决方法。    
-> 4、在ViewPager中使用是正常的，ViewPager已经处理好了滑动冲突。    
-> 5、在ViewPager2中使用存在滑动冲突，ViewPager2未做滑动冲突处理，**本库已经处理滑动冲突**，若不满足您的需求可自行处理。
+> 2、Item布局的**宽高**必须是**match_parent**。(item layout's width and height must use **match_parent**.)        
+> 3、在ViewPager中使用是正常的，ViewPager已经处理好了滑动冲突。    
+> 4、在ViewPager2中使用存在滑动冲突，ViewPager2未做滑动冲突处理，**本库已经处理滑动冲突**，若不满足您的需求可自行处理。
 
 ### 使用PagerGridLayoutManager
 ```java
