@@ -22,6 +22,7 @@
 - 支持scrollBar
 - 状态恢复
 - 滑动冲突处理
+- 支持clipToPadding=false
 
 ## 引入
 ### 将JitPack存储库添加到您的项目中(项目根目录下build.gradle文件)
@@ -45,6 +46,7 @@ dependencies {
     //或者 or 
     //水平排列方式：先从上到下，再从左到右。最终版本。
     //Horizontal arrangement: from top to bottom, then from left to right. Final version.
+    //弃用，Deprecated.
     implementation 'com.github.shenbengit:PagerGridLayoutManager:1.0.6'
 }
 ```
