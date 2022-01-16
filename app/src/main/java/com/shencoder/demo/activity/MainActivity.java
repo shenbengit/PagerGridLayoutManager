@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         rv.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.set(10, 10, 10, 10);
+                outRect.set(20, 10, 20, 10);
             }
         });
         TextView tvPagerIndex = findViewById(R.id.tvPagerIndex);

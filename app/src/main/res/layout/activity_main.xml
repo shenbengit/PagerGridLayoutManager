@@ -14,7 +14,8 @@
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="260dp"
-        android:layout_margin="5dp" />
+        android:clipToPadding="false"
+        android:padding="20dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

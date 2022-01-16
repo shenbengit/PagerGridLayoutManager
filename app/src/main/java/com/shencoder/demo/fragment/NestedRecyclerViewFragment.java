@@ -45,7 +45,7 @@ public class NestedRecyclerViewFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         rv = view.findViewById(R.id.rv);
         NestedRecyclerViewAdapter adapter = new NestedRecyclerViewAdapter();
