@@ -1,8 +1,10 @@
-Change Log:  
+Change Log: 
 
+**v1.1.3**      
+- fix [#7](https://github.com/shenbengit/PagerGridLayoutManager/issues/7),fix [#11](https://github.com/shenbengit/PagerGridLayoutManager/issues/11).   
 
 **v1.1.1**    
-- fix [#5](https://github.com/shenbengit/PagerGridLayoutManager/issues/5)； 
+- fix [#5](https://github.com/shenbengit/PagerGridLayoutManager/issues/5).  
 
 **v1.1.0**    
 - 水平排列方式调整为先从左到右再从上到下； 
