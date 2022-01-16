@@ -1,5 +1,8 @@
 Change Log: 
 
+**v1.1.5**      
+- fix [#9](https://github.com/shenbengit/PagerGridLayoutManager/issues/9),fix [#13](https://github.com/shenbengit/PagerGridLayoutManager/issues/13). 
+
 **v1.1.3**      
 - fix [#7](https://github.com/shenbengit/PagerGridLayoutManager/issues/7),fix [#11](https://github.com/shenbengit/PagerGridLayoutManager/issues/11).   
 
