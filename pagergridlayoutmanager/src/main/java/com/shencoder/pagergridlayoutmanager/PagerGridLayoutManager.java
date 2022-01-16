@@ -108,9 +108,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * 用于保存一些状态
      */
-    private final LayoutState mLayoutState;
+    protected final LayoutState mLayoutState;
 
-    private final LayoutChunkResult mLayoutChunkResult;
+    protected final LayoutChunkResult mLayoutChunkResult;
     /**
      * 用于计算锚点坐标-左上角第一个view的位置
      */
@@ -355,31 +355,37 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (firstView == null) {
             //按页且从左上角开始布局
             mLayoutState.mCurrentPosition = pagerIndex * mOnePageSize;
+
+            int calculateClipOffset = calculateClipOffset(true, mLayoutState.mCurrentPosition);
+
             if (mOrientation == RecyclerView.HORIZONTAL) {
                 bottom = getHeight() - getPaddingBottom();
-                right = getPaddingLeft();
+                right = getPaddingStart() - calculateClipOffset;
             } else {
-                bottom = getPaddingTop();
-                right = getWidth() - getPaddingRight();
+                bottom = getPaddingTop() - calculateClipOffset;
+                right = getWidth() - getPaddingEnd();
             }
         } else {
             //计算布局偏移量
             int position = getPosition(firstView);
             mLayoutState.mCurrentPosition = position;
             Rect rect = mLayoutState.mOffsetRect;
+
+            int calculateClipOffset = calculateClipOffset(true, mLayoutState.mCurrentPosition);
+
             getDecoratedBoundsWithMargins(firstView, rect);
             if (mOrientation == RecyclerView.HORIZONTAL) {
                 if (isNeedMoveToNextSpan(position)) {
                     bottom = getHeight() - getPaddingBottom();
-                    right = rect.left;
+                    right = rect.left - calculateClipOffset;
                 } else {
                     bottom = rect.top;
                     right = rect.right;
                 }
             } else {
                 if (isNeedMoveToNextSpan(position)) {
-                    bottom = rect.top;
-                    right = getWidth() - getPaddingRight();
+                    bottom = rect.top - calculateClipOffset;
+                    right = getWidth() - getPaddingEnd();
                 } else {
                     bottom = rect.bottom;
                     right = rect.left;
@@ -1011,7 +1017,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 //向后填充，绘制方向：从上到下
                 if (isNeedMoveSpan) {
                     //下一列绘制，从头部开始
-                    left = rect.left + mItemWidth;
+                    left = rect.left + mItemWidth + calculateClipOffset(true, position);
                     top = getPaddingTop();
                 } else {
                     //当前列绘制
@@ -1024,7 +1030,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 //向前填充，绘制方向：从下到上
                 if (isNeedMoveSpan) {
                     //上一列绘制，从底部开启
-                    left = rect.left - mItemWidth;
+                    left = rect.left - mItemWidth - calculateClipOffset(false, position);
                     bottom = getHeight() - getPaddingBottom();
                 } else {
                     //当前列绘制
@@ -1039,8 +1045,8 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 //向后填充，绘制方向：从左到右
                 if (isNeedMoveSpan) {
                     //下一行绘制，从头部开始
-                    left = getPaddingLeft();
-                    top = rect.bottom;
+                    left = getPaddingStart();
+                    top = rect.bottom + calculateClipOffset(true, position);
                 } else {
                     //当前行绘制
                     left = rect.left + mItemWidth;
@@ -1052,9 +1058,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
                 //向前填充，绘制方向：从右到左
                 if (isNeedMoveSpan) {
                     //上一行绘制，从尾部开始
-                    right = getWidth() - getPaddingRight();
+                    right = getWidth() - getPaddingEnd();
                     left = right - mItemWidth;
-                    bottom = rect.top;
+                    bottom = rect.top - calculateClipOffset(false, position);
                     top = bottom - mItemHeight;
                 } else {
                     //当前行绘制
@@ -1157,7 +1163,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     private void recycleViewsFromStart(RecyclerView.Recycler recycler) {
-        int start = getPaddingStart();
+        //如果clipToPadding==false，则不计算padding
+        boolean clipToPadding = getClipToPadding();
+        int start = clipToPadding ? getStartAfterPadding() : 0;
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = getChildAt(i);
@@ -1173,7 +1181,9 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     private void recycleViewsFromEnd(RecyclerView.Recycler recycler) {
-        int end = getEndAfterPadding();
+        //如果clipToPadding==false，则不计算padding
+        boolean clipToPadding = getClipToPadding();
+        int end = clipToPadding ? getEndAfterPadding() : (mOrientation == HORIZONTAL ? getWidth() : getHeight());
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = getChildAt(i);
@@ -1204,6 +1214,22 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
 
     private int getStartAfterPadding() {
         return mOrientation == HORIZONTAL ? getPaddingStart() : getPaddingTop();
+    }
+
+    private int getClipToPaddingSize() {
+        return mOrientation == HORIZONTAL ? getPaddingStart() + getPaddingEnd() : getPaddingTop() + getPaddingBottom();
+    }
+
+    /**
+     * 计算{@link #getClipToPadding()}==false时偏移量
+     *
+     * @param layoutToEnd 是否是向后布局
+     * @param position    position
+     * @return offset
+     */
+    private int calculateClipOffset(boolean layoutToEnd, int position) {
+        boolean clipToPadding = getClipToPadding();
+        return !clipToPadding && (position % mOnePageSize == (layoutToEnd ? 0 : mOnePageSize - 1)) ? getClipToPaddingSize() : 0;
     }
 
     private int getEnd() {

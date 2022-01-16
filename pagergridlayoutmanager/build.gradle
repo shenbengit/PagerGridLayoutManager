@@ -16,7 +16,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
     compileOnly 'androidx.recyclerview:recyclerview:1.2.1'
 }
 
@@ -33,7 +32,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.shencoder'
                 artifactId = 'pagergridlayoutmanager'
-                version = '1.1.2'
+                version = '1.1.4'
             }
         }
     }
