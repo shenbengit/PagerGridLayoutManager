@@ -131,4 +131,10 @@ layoutManager.setMaxScrollOnFlingDuration(200);
 
 如果此库对您有用，欢迎给个**star**！
 
+## 作者其他的开源项目
+- Android端WebRTC一些扩展方法：[WebRTCExtension](https://github.com/shenbengit/WebRTCExtension)
+- 基于Netty封装UDP收发工具：[UdpNetty](https://github.com/shenbengit/UdpNetty)
+- Android端基于JavaCV实现人脸检测功能：[JavaCV-FaceDetect](https://github.com/shenbengit/JavaCV-FaceDetect)
+- 使用Kotlin搭建Android MVVM快速开发框架：[MVVMKit](https://github.com/shenbengit/MVVMKit)
+
 # [License](https://github.com/shenbengit/PagerGridLayoutManager/blob/master/LICENSE)
