@@ -109,7 +109,7 @@ recyclerView.smoothScrollToPosition(10);
 
 //滚动到指定页
 layoutManager.scrollToPagerIndex(3);
-//平滑滚动到指定页，注意：如果滚动的页与当前页超过3，避免长时间滚动，会先直接滚动到就近的附近，再做平滑滚动
+//平滑滚动到指定页，注意：如果滚动的页与当前页超过3，避免长时间滚动，会先直接滚动到就近的页，再做平滑滚动
 layoutManager.smoothScrollToPagerIndex(6);
 //滚动到上一页
 layoutManager.scrollToPrePager();
