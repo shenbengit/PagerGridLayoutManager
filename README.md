@@ -103,7 +103,12 @@ layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedLis
 });
 //设置滑动方向
 layoutManager.setOrientation(/*PagerGridLayoutManager.HORIZONTAL*/ PagerGridLayoutManager.VERTICAL);
-//是否反向布局
+/*
+是否反向布局，自动兼容RTL；
+注意：水平方向反向是排列顺序和滑动放向都反向，垂直方向仅排列顺序反向；
+Whether the layout is reversed, automatically compatible with RTL;
+Note: The horizontal reverse is the reverse of the arrangement order and the sliding direction, and the vertical direction is only the reverse of the arrangement order;
+*/
 layoutManager.setReverseLayout(/*true*/ false);
 //设置行数
 layoutManager.setRows(2);
