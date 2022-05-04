@@ -24,11 +24,11 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
     /**
      * @see #calculateSpeedPerPixel(DisplayMetrics)
      */
-    static final float MILLISECONDS_PER_INCH = 70f;
+    static final float MILLISECONDS_PER_INCH = 100f;
     /**
      * @see #calculateTimeForScrolling(int)
      */
-    static final int MAX_SCROLL_ON_FLING_DURATION = 200; //ms
+    static final int MAX_SCROLL_ON_FLING_DURATION = 500; //ms
 
     PagerGridSmoothScroller(@NonNull RecyclerView recyclerView, @NonNull PagerGridLayoutManager layoutManager) {
         super(recyclerView.getContext());
@@ -58,6 +58,9 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
             }
 
             boolean isLayoutToEnd = pointF.x > 0 || pointF.y > 0;
+            if (manager.shouldHorizontallyReverseLayout()) {
+                isLayoutToEnd = !isLayoutToEnd;
+            }
             Rect snapRect;
             if (isLayoutToEnd) {
                 snapRect = manager.getStartSnapRect();
@@ -70,10 +73,13 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
             int dy = calculateDy(manager, snapRect, targetRect, isLayoutToEnd);
             final int time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));
             if (PagerGridLayoutManager.DEBUG) {
-                Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
+                Log.i(TAG, "onTargetFound-targetPosition:" + targetPosition + ", dx:" + dx + ",dy:" + dy + ",time:" + time + ",isLayoutToEnd:" + isLayoutToEnd + ",snapRect:" + snapRect + ",targetRect:" + targetRect);
             }
             if (time > 0) {
                 action.update(dx, dy, time, mDecelerateInterpolator);
+            } else {
+                //说明滑动完成，计算页标
+                manager.calculateCurrentPagerIndexByPosition(targetPosition);
             }
         }
     }
@@ -86,7 +92,11 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
      */
     @Override
     protected float calculateSpeedPerPixel(DisplayMetrics displayMetrics) {
-        return mLayoutManager.getMillisecondPreInch() / displayMetrics.densityDpi;
+        float speed = mLayoutManager.getMillisecondPreInch() / displayMetrics.densityDpi;
+        if (PagerGridLayoutManager.DEBUG) {
+            Log.i(TAG, "calculateSpeedPerPixel-speed: " + speed);
+        }
+        return speed;
     }
 
     /**
@@ -97,7 +107,9 @@ class PagerGridSmoothScroller extends LinearSmoothScroller {
      */
     @Override
     protected final int calculateTimeForScrolling(int dx) {
-        return Math.min(mLayoutManager.getMaxScrollOnFlingDuration(), super.calculateTimeForScrolling(dx));
+        int time = Math.min(mLayoutManager.getMaxScrollOnFlingDuration(), super.calculateTimeForScrolling(dx));
+        Log.i(TAG, "calculateTimeForScrolling-time: " + time);
+        return time;
     }
 
     static int calculateDx(PagerGridLayoutManager manager, Rect snapRect, Rect targetRect) {
