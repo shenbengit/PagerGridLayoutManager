@@ -23,6 +23,7 @@
 - 状态恢复
 - 滑动冲突处理
 - 支持clipToPadding=false
+- 支持Reverse Layout，兼容RTL
 
 ## 引入
 ### 将JitPack存储库添加到您的项目中(项目根目录下build.gradle文件)
@@ -62,7 +63,12 @@ dependencies {
 //是否开启调试日志
 PagerGridLayoutManager.setDebug(BuildConfig.DEBUG);
 
-PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(/*rows*/3, /*columns*/ 3, /*PagerGridLayoutManager.VERTICAL*/PagerGridLayoutManager.HORIZONTAL);
+PagerGridLayoutManager layoutManager = new PagerGridLayoutManager(
+        /*rows*/3, 
+        /*columns*/ 3, 
+        /*PagerGridLayoutManager.VERTICAL*/PagerGridLayoutManager.HORIZONTAL, 
+        /*reverseLayout*/ false
+);
 /*
 是否启用处理滑动冲突滑动冲突，default: true；若不需要库中自带的处理方式，则置为false，自行处理。
 setHandlingSlidingConflictsEnabled() 必须要在{@link RecyclerView#setLayoutManager(RecyclerView.LayoutManager)} 之前调用，否则无效
@@ -96,7 +102,9 @@ layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedLis
     }
 });
 //设置滑动方向
-layoutManager.setOrientation(/*PagerGridLayoutManager.HORIZONTAL*/PagerGridLayoutManager.VERTICAL);
+layoutManager.setOrientation(/*PagerGridLayoutManager.HORIZONTAL*/ PagerGridLayoutManager.VERTICAL);
+//是否反向布局
+layoutManager.setReverseLayout(/*true*/ false);
 //设置行数
 layoutManager.setRows(2);
 //设置列数
