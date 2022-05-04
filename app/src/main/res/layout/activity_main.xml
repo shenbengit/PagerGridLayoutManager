@@ -14,7 +14,7 @@
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="260dp"
-        android:clipToPadding="false"
+        android:clipToPadding="true"
         android:padding="20dp" />
 
     <LinearLayout
@@ -90,6 +90,39 @@
                     android:text="VERTICAL" />
             </RadioGroup>
 
+            <TextView
+                android:id="@+id/tvReverseLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="ReverseLayout："
+                android:textColor="@android:color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvOrientation" />
+
+            <RadioGroup
+                android:id="@+id/rgReverseLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="@id/tvReverseLayout"
+                app:layout_constraintStart_toEndOf="@id/tvReverseLayout"
+                app:layout_constraintTop_toTopOf="@id/tvReverseLayout">
+
+                <RadioButton
+                    android:id="@+id/rbReverseTrue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRUE" />
+
+                <RadioButton
+                    android:id="@+id/rbReverseFalse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="FALSE" />
+            </RadioGroup>
+
             <EditText
                 android:id="@+id/etRows"
                 android:layout_width="50dp"
@@ -100,7 +133,7 @@
                 android:singleLine="true"
                 android:text="3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvOrientation" />
+                app:layout_constraintTop_toBottomOf="@id/tvReverseLayout" />
 
             <Button
                 android:id="@+id/btnSetRows"

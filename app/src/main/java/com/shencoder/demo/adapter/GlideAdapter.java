@@ -1,5 +1,6 @@
 package com.shencoder.demo.adapter;
 
+import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.shencoder.demo.bean.GlideBean;
  * @email 714081644@qq.com
  */
 public class GlideAdapter extends BaseQuickAdapter<GlideBean, BaseViewHolder> {
+    public static final String TAG = "GlideAdapter";
 
     public GlideAdapter() {
         super(R.layout.item_glide);
@@ -23,6 +25,8 @@ public class GlideAdapter extends BaseQuickAdapter<GlideBean, BaseViewHolder> {
 
     @Override
     protected void convert(@NonNull BaseViewHolder holder, GlideBean glideBean) {
+        int position = holder.getLayoutPosition() - getHeaderLayoutCount();
+        Log.i(TAG, "onBindViewHolder-position: " + position);
         holder.setText(R.id.tv, glideBean.getTitle());
         ImageView iv = holder.getView(R.id.iv);
         //wrap_content

@@ -1,0 +1,68 @@
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"DesignSurface\">\r\n    <option name=\"filePathToZoomLevelMap\">\r\n      <map>\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/drawable-v24/ic_launcher_foreground.xml\" value=\"0.20833333333333334\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/drawable/ic_launcher_background.xml\" value=\"0.20833333333333334\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_glide.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_main.xml\" value=\"0.2\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_view_pager.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_empty.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_nested_recycler.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_test.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_view_pager.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_view_pager2.xml\" value=\"0.2\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/item_glide.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/item_nested_normal.xml\" value=\"0.128\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/item_nested_recycler_view.xml\" value=\"0.11727456940222898\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/item_test.xml\" value=\"0.24114583333333334\" />\r\n        <entry key=\"..\\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml\" value=\"0.20833333333333334\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"FindBugsConfigurable\">\r\n    <option name=\"make\" value=\"true\" />\r\n    <option name=\"effort\" value=\"default\" />\r\n    <option name=\"priority\" value=\"Medium\" />\r\n    <option name=\"excludeFilter\" value=\"\" />\r\n  </component>\r\n  <component name=\"NullableNotNullManager\">\r\n    <option name=\"myDefaultNullable\" value=\"org.jetbrains.annotations.Nullable\" />\r\n    <option name=\"myDefaultNotNull\" value=\"androidx.annotation.NonNull\" />\r\n    <option name=\"myNullables\">\r\n      <value>\r\n        <list size=\"15\">\r\n          <item index=\"0\" class=\"java.lang.String\" itemvalue=\"org.jetbrains.annotations.Nullable\" />\r\n          <item index=\"1\" class=\"java.lang.String\" itemvalue=\"javax.annotation.Nullable\" />\r\n          <item index=\"2\" class=\"java.lang.String\" itemvalue=\"javax.annotation.CheckForNull\" />\r\n          <item index=\"3\" class=\"java.lang.String\" itemvalue=\"edu.umd.cs.findbugs.annotations.Nullable\" />\r\n          <item index=\"4\" class=\"java.lang.String\" itemvalue=\"android.support.annotation.Nullable\" />\r\n          <item index=\"5\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.Nullable\" />\r\n          <item index=\"6\" class=\"java.lang.String\" itemvalue=\"android.annotation.Nullable\" />\r\n          <item index=\"7\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.RecentlyNullable\" />\r\n          <item index=\"8\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.qual.Nullable\" />\r\n          <item index=\"9\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.compatqual.NullableDecl\" />\r\n          <item index=\"10\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.compatqual.NullableType\" />\r\n          <item index=\"11\" class=\"java.lang.String\" itemvalue=\"com.android.annotations.Nullable\" />\r\n          <item index=\"12\" class=\"java.lang.String\" itemvalue=\"org.eclipse.jdt.annotation.Nullable\" />\r\n          <item index=\"13\" class=\"java.lang.String\" itemvalue=\"io.reactivex.annotations.Nullable\" />\r\n          <item index=\"14\" class=\"java.lang.String\" itemvalue=\"io.reactivex.rxjava3.annotations.Nullable\" />\r\n        </list>\r\n      </value>\r\n    </option>\r\n    <option name=\"myNotNulls\">\r\n      <value>\r\n        <list size=\"15\">\r\n          <item index=\"0\" class=\"java.lang.String\" itemvalue=\"org.jetbrains.annotations.NotNull\" />\r\n          <item index=\"1\" class=\"java.lang.String\" itemvalue=\"javax.annotation.Nonnull\" />\r\n          <item index=\"2\" class=\"java.lang.String\" itemvalue=\"edu.umd.cs.findbugs.annotations.NonNull\" />\r\n          <item index=\"3\" class=\"java.lang.String\" itemvalue=\"android.support.annotation.NonNull\" />\r\n          <item index=\"4\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.NonNull\" />\r\n          <item index=\"5\" class=\"java.lang.String\" itemvalue=\"android.annotation.NonNull\" />\r\n          <item index=\"6\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.RecentlyNonNull\" />\r\n          <item index=\"7\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.qual.NonNull\" />\r\n          <item index=\"8\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.compatqual.NonNullDecl\" />\r\n          <item index=\"9\" class=\"java.lang.String\" itemvalue=\"org.checkerframework.checker.nullness.compatqual.NonNullType\" />\r\n          <item index=\"10\" class=\"java.lang.String\" itemvalue=\"com.android.annotations.NonNull\" />\r\n          <item index=\"11\" class=\"java.lang.String\" itemvalue=\"org.eclipse.jdt.annotation.NonNull\" />\r\n          <item index=\"12\" class=\"java.lang.String\" itemvalue=\"io.reactivex.annotations.NonNull\" />\r\n          <item index=\"13\" class=\"java.lang.String\" itemvalue=\"io.reactivex.rxjava3.annotations.NonNull\" />\r\n          <item index=\"14\" class=\"java.lang.String\" itemvalue=\"lombok.NonNull\" />\r\n        </list>\r\n      </value>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_11\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n  <component name=\"SuppressionsComponent\">\r\n    <option name=\"suppComments\" value=\"[]\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 4feb2f32478bc15cd7ac64849e18b32036254ca5)
++++ b/.idea/misc.xml	(date 1647611244486)
+@@ -8,6 +8,7 @@
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_glide.xml" value="0.11727456940222898" />
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_main.xml" value="0.2" />
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_view_pager.xml" value="0.11727456940222898" />
++        <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/activity_view_pager2.xml" value="0.16094771241830066" />
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_empty.xml" value="0.11727456940222898" />
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_nested_recycler.xml" value="0.11727456940222898" />
+         <entry key="..\:/Work/Android/AndroidStudioProjects/PagerGridLayoutManager/app/src/main/res/layout/fragment_test.xml" value="0.11727456940222898" />
+Index: app/src/main/java/com/shencoder/demo/MyRelativeLayout.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/shencoder/demo/MyRelativeLayout.java b/app/src/main/java/com/shencoder/demo/MyRelativeLayout.java
+new file mode 100644
+--- /dev/null	(date 1647610998832)
++++ b/app/src/main/java/com/shencoder/demo/MyRelativeLayout.java	(date 1647610998832)
+@@ -0,0 +1,40 @@
++package com.shencoder.demo;
++
++import android.content.Context;
++import android.os.Build;
++import android.util.AttributeSet;
++import android.widget.RelativeLayout;
++
++/**
++ * @author ShenBen
++ * @date 2022/03/18 21:33
++ * @email 714081644@qq.com
++ */
++public class MyRelativeLayout extends RelativeLayout {
++    public MyRelativeLayout(Context context) {
++        super(context);
++    }
++
++    public MyRelativeLayout(Context context, AttributeSet attrs) {
++        super(context, attrs);
++    }
++
++    public MyRelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
++        super(context, attrs, defStyleAttr);
++    }
++
++    @Override
++    public LayoutParams generateLayoutParams(AttributeSet attrs) {
++        LayoutParams layoutParams = super.generateLayoutParams(attrs);
++        System.out.println("generateLayoutParams--->" + layoutParams.width + "," + layoutParams.height);
++
++        return layoutParams;
++    }
++
++    @Override
++    protected void onLayout(boolean changed, int l, int t, int r, int b) {
++
++        super.onLayout(changed, l, t, r, b);
++
++    }
++}

@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RadioGroup rgOrientation = findViewById(R.id.rgOrientation);
+        RadioGroup rgReverseLayout = findViewById(R.id.rgReverseLayout);
         RadioButton rbHorizontal = findViewById(R.id.rbHorizontal);
         RadioButton rbVertical = findViewById(R.id.rbVertical);
+        RadioButton rbReverseTrue = findViewById(R.id.rbReverseTrue);
         EditText etRows = findViewById(R.id.etRows);
         EditText etColumns = findViewById(R.id.etColumns);
         EditText etPosition = findViewById(R.id.etPosition);
@@ -64,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
                 Integer.parseInt(etRows.getText().toString()),
                 Integer.parseInt(etColumns.getText().toString()),
                 rbHorizontal.isChecked() ? PagerGridLayoutManager.HORIZONTAL : PagerGridLayoutManager.VERTICAL);
+
+        //是否反向布局
+        layoutManager.setReverseLayout(rbReverseTrue.isChecked());
+
         layoutManager.setPagerChangedListener(new PagerGridLayoutManager.PagerChangedListener() {
             @Override
             public void onPagerCountChanged(int pagerCount) {
@@ -79,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //设置滑动每像素需要花费的时间
-        layoutManager.setMillisecondPreInch(70);
+        layoutManager.setMillisecondPreInch(100);
         //设置最大滚动时间
-        layoutManager.setMaxScrollOnFlingDuration(200);
+        layoutManager.setMaxScrollOnFlingDuration(500);
 
         rv.setLayoutManager(layoutManager);
         TestAdapter adapter = new TestAdapter();
@@ -108,6 +114,13 @@ public class MainActivity extends AppCompatActivity {
                 layoutManager.setOrientation(PagerGridLayoutManager.HORIZONTAL);
             } else if (checkedId == R.id.rbVertical) {
                 layoutManager.setOrientation(PagerGridLayoutManager.VERTICAL);
+            }
+        });
+        rgReverseLayout.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbReverseTrue) {
+                layoutManager.setReverseLayout(true);
+            } else if (checkedId == R.id.rbReverseFalse) {
+                layoutManager.setReverseLayout(false);
             }
         });
         findViewById(R.id.btnSetColumns).setOnClickListener(v -> {
