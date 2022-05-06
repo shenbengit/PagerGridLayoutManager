@@ -1,5 +1,8 @@
 Change Log: 
 
+**v1.1.6**      
+- support reverse layout and RTL.
+
 **v1.1.5**      
 - fix [#9](https://github.com/shenbengit/PagerGridLayoutManager/issues/9),fix [#13](https://github.com/shenbengit/PagerGridLayoutManager/issues/13). 
 
