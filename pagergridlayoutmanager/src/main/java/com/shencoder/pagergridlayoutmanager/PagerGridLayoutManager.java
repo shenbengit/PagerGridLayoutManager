@@ -330,8 +330,6 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             mEndSnapRect.set(getWidth() - getPaddingEnd() - mItemWidth, getHeight() - getPaddingBottom() - mItemHeight, getWidth() - getPaddingEnd(), getHeight() - getPaddingBottom());
         }
 
-        mOnePageSize = mRows * mColumns;
-
         //计算总页数
         int pagerCount = itemCount / mOnePageSize;
         if (itemCount % mOnePageSize != 0) {
@@ -585,6 +583,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
             mOrientation = savedState.mOrientation;
             mRows = savedState.mRows;
             mColumns = savedState.mColumns;
+            calculateOnePageSize();
             setCurrentPagerIndex(savedState.mCurrentPagerIndex);
             mReverseLayout = savedState.mReverseLayout;
             requestLayout();
@@ -767,8 +766,16 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     }
 
     /**
+     * 计算一页的数量
+     */
+    private void calculateOnePageSize() {
+        mOnePageSize = mRows * mColumns;
+    }
+
+    /**
      * @return 一页的数量
      */
+    @IntRange(from = 1)
     public final int getOnePageSize() {
         return mOnePageSize;
     }
@@ -782,6 +789,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mColumns = Math.max(columns, 1);
         mPagerCount = NO_PAGER_COUNT;
         mCurrentPagerIndex = NO_ITEM;
+        calculateOnePageSize();
         requestLayout();
     }
 
@@ -802,6 +810,7 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         mRows = Math.max(rows, 1);
         mPagerCount = NO_PAGER_COUNT;
         mCurrentPagerIndex = NO_ITEM;
+        calculateOnePageSize();
         requestLayout();
     }
 
