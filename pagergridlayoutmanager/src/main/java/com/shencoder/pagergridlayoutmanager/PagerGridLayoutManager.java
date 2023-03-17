@@ -36,6 +36,7 @@ import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
  */
 public class PagerGridLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider {
     private static final String TAG = "PagerGridLayoutManager";
+    public static final int UN_SET = 0;
     /**
      * 是否启用Debug
      */
@@ -92,11 +93,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     /**
      * item的宽度
      */
-    private int mItemWidth;
+    private int mItemWidth = UN_SET;
     /**
      * item的高度
      */
-    private int mItemHeight;
+    private int mItemHeight = UN_SET;
     /**
      * 一个ItemView的所有ItemDecoration占用的宽度(px)
      */
@@ -270,30 +271,38 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
     public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state, int widthSpec, int heightSpec) {
         int widthMode = View.MeasureSpec.getMode(widthSpec);
         int heightMode = View.MeasureSpec.getMode(heightSpec);
-        //判断RecyclerView的宽度和高度是不是精确值
-        if (widthMode != View.MeasureSpec.EXACTLY || heightMode != View.MeasureSpec.EXACTLY) {
-            throw new IllegalStateException("RecyclerView's width and height must be exactly");
-        }
         int widthSize = View.MeasureSpec.getSize(widthSpec);
         int heightSize = View.MeasureSpec.getSize(heightSpec);
+        //判断RecyclerView的宽度和高度是不是精确值
+        if (widthMode == View.MeasureSpec.EXACTLY && heightMode == View.MeasureSpec.EXACTLY) {
+            int realWidth = widthSize - getPaddingStart() - getPaddingEnd();
+            int realHeight = heightSize - getPaddingTop() - getPaddingBottom();
+            //均分宽
+            mItemWidth = mColumns > 0 ? realWidth / mColumns : 0;
+            //均分高
+            mItemHeight = mRows > 0 ? realHeight / mRows : 0;
 
-        int realWidth = widthSize - getPaddingStart() - getPaddingEnd();
-        int realHeight = heightSize - getPaddingTop() - getPaddingBottom();
-        //均分宽
-        mItemWidth = mColumns > 0 ? realWidth / mColumns : 0;
-        //均分高
-        mItemHeight = mRows > 0 ? realHeight / mRows : 0;
+            //重置下宽高，因为在均分的时候，存在除不尽的情况，要减去多出来的这部分大小，一般也就为几px
+            //不减去的话，会导致翻页计算不触发
+            diffWidth = realWidth - mItemWidth * mColumns;
+            diffHeight = realHeight - mItemHeight * mRows;
 
-        //重置下宽高，因为在均分的时候，存在除不尽的情况，要减去多出来的这部分大小，一般也就为几px
-        //不减去的话，会导致翻页计算不触发
-        diffWidth = realWidth - mItemWidth * mColumns;
-        diffHeight = realHeight - mItemHeight * mRows;
-
-        mItemWidthUsed = realWidth - diffWidth - mItemWidth;
-        mItemHeightUsed = realHeight - diffHeight - mItemHeight;
+            mItemWidthUsed = realWidth - diffWidth - mItemWidth;
+            mItemHeightUsed = realHeight - diffHeight - mItemHeight;
+        } else {
+            mItemWidth = UN_SET;
+            mItemHeight = UN_SET;
+            diffWidth = 0;
+            diffHeight = 0;
+            mItemWidthUsed = 0;
+            mItemHeightUsed = 0;
+            if (DEBUG) {
+                Log.w(TAG, "onMeasure-width or height is not exactly, widthMode: " + widthMode + ", heightMode: " + heightMode);
+            }
+        }
 
         if (DEBUG) {
-            Log.d(TAG, "onMeasure-originalWidthSize: " + widthSize + ",originalHeightSize: " + heightSize + ",diffWidth: " + diffWidth + ",diffHeight: " + diffHeight + ",mItemWidth: " + mItemWidth + ",mItemHeight: " + mItemHeight + ",mStartSnapRect:" + mStartSnapRect + ",mEndSnapRect:" + mEndSnapRect);
+            Log.d(TAG, "onMeasure-widthMode: " + widthMode + ", heightMode: " + heightMode + ", originalWidthSize: " + widthSize + ",originalHeightSize: " + heightSize + ",diffWidth: " + diffWidth + ",diffHeight: " + diffHeight + ",mItemWidth: " + mItemWidth + ",mItemHeight: " + mItemHeight + ",mStartSnapRect:" + mStartSnapRect + ",mEndSnapRect:" + mEndSnapRect);
         }
         super.onMeasure(recycler, state, widthSpec, heightSpec);
     }
@@ -303,6 +312,11 @@ public class PagerGridLayoutManager extends RecyclerView.LayoutManager implement
         if (DEBUG) {
             Log.d(TAG, "onLayoutChildren: " + state.toString());
         }
+
+        if (mItemWidth == UN_SET || mItemHeight == UN_SET) {
+            throw new IllegalStateException("RecyclerView's width and height must be exactly.");
+        }
+
         int itemCount = getItemCount();
         if (itemCount == 0) {
             removeAndRecycleAllViews(recycler);
