@@ -1,5 +1,8 @@
 Change Log: 
 
+**v1.1.8**      
+- fix RecyclerView 宽高是权重大小是报错问题.
+
 **v1.1.7**      
 - 修复mOnePageSize某些情况下值为0的问题.
 
